@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>vertx-lambda-service</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <name>An AWS Lambda Vert.x Service</name>
+
+  <properties>
+    <!-- Code build properties -->
+    <vertx.version>4.0.0</vertx.version>
+    <graalvm.version>20.3.0</graalvm.version>
+
+    <!-- Docker build properties -->
+    <maven.version>3.6.3</maven.version>
+    <maven.checksum>c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0</maven.checksum>
+    <graalvm.jdk.version>java11</graalvm.jdk.version>
+    <alpine.version>3.12.3</alpine.version>
+
+    <!-- The AWS Lambda's main verticle -->
+    <vertx.verticle>info.freelibrary.vertx.lambda.HttpVerticle</vertx.verticle>
+
+    <!-- Plugin versions -->
+    <vertx.plugin.version>1.0.23</vertx.plugin.version>
+    <deploy.plugin.version>3.0.0-M1</deploy.plugin.version>
+    <docker.plugin.version>0.34.1</docker.plugin.version>
+
+    <!-- Maven build properties -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <skipBuild>true</skipBuild>
+
+    <!-- The Docker registry user and password used for publishing images -->
+    <docker.registry.username />
+    <docker.registry.password />
+
+    <!-- The Docker registry account, if supplied, must end with a slash (e.g. "account/") -->
+    <docker.registry.account />
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-stack-depchain</artifactId>
+        <version>${vertx.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
+    </dependency>
+
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-unit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+            <configuration>
+              <skipMain>${skipBuild}</skipMain>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>io.reactiverse</groupId>
+        <artifactId>vertx-maven-plugin</artifactId>
+        <version>${vertx.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>vertx</id>
+            <goals>
+              <goal>initialize</goal>
+              <goal>package</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <redeploy>true</redeploy>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <forkCount>1</forkCount>
+          <reuseForks>false</reuseForks>
+          <skipTests>${skipBuild}</skipTests>
+          <argLine>${jacoco.agent.arg}</argLine>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.graalvm.nativeimage</groupId>
+        <artifactId>native-image-maven-plugin</artifactId>
+        <version>${graalvm.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>native-image</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <imageName>bootstrap</imageName>
+          <mainClass>${vertx.verticle}</mainClass>
+          <buildArgs>
+            <buildArg>--static</buildArg>
+            <!-- <buildArg>-\-libc=musl</buildArg>-->
+            <buildArg>-Djava.net.preferIPv4Stack=true</buildArg>
+            <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+            <buildArg>-H:+PrintClassInitialization</buildArg>
+          </buildArgs>
+        </configuration>
+      </plugin>
+      <!-- Disable standard deploy; we publish a Docker image, not Jar file -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>${deploy.plugin.version}</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <!-- A Maven plugin that can build a Docker image with our application -->
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker.plugin.version}</version>
+        <configuration>
+          <verbose>true</verbose>
+          <images>
+            <image>
+              <!-- Registry account, if supplied, must end in a slash (e.g. "account/") -->
+              <name>${docker.registry.account}${project.artifactId}:%l</name>
+              <build>
+                <args>
+                  <PROJECT_NAME>${project.artifactId}</PROJECT_NAME>
+                  <GRAALVM_TAG>${graalvm.version}-${graalvm.jdk.version}</GRAALVM_TAG>
+                  <GRAALVM_HOME>/opt/graalvm-ce-${graalvm.jdk.version}-${graalvm.version}</GRAALVM_HOME>
+                  <MAVEN_CHECKSUM>${maven.checksum}</MAVEN_CHECKSUM>
+                  <MAVEN_VERSION>${maven.version}</MAVEN_VERSION>
+                  <ALPINE_TAG>${alpine.version}</ALPINE_TAG>
+                </args>
+                <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
+                <assembly>
+                  <descriptorRef>project</descriptorRef>
+                </assembly>
+              </build>
+            </image>
+          </images>
+          <authConfig>
+            <username>${docker.registry.username}</username>
+            <password>${docker.registry.password}</password>
+          </authConfig>
+        </configuration>
+        <executions>
+          <execution>
+            <id>docker-build</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <parent>
+    <artifactId>freelib-parent</artifactId>
+    <groupId>info.freelibrary</groupId>
+    <version>6.3.0</version>
+  </parent>
+
+</project>

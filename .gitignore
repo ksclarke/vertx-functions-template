@@ -1,0 +1,12 @@
+
+# Build artifacts to ignore
+target
+build
+lib_managed
+
+# Runtime files to ignore
+.vertx
+
+# AWS build artifact
+function.zip
+/bin/
