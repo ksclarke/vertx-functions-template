@@ -39,8 +39,9 @@ COPY /maven/ .
 RUN mvn -ntp -q -B package -DskipBuild=false
 
 # Set up the image to which to copy our build artifacts
-FROM ksclarke/alpine-glibc:latest
+#FROM ksclarke/alpine-glibc:latest
 #FROM alpine:latest
+FROM gcr.io/distroless/static-debian10:latest
 
 LABEL maintainer="Kevin S. Clarke <ksclarke@ksclarke.io>"
 
@@ -53,4 +54,4 @@ ARG PROJECT_NAME
 COPY --from=builder /opt/${PROJECT_NAME}/target/bootstrap /usr/bin/bootstrap
 COPY --from=builder ${GRAALVM_HOME}/lib/security/cacerts /usr/share/misc/cacerts
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["bootstrap"]

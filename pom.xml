@@ -133,9 +133,9 @@
           <imageName>bootstrap</imageName>
           <mainClass>${vertx.verticle}</mainClass>
           <buildArgs>
-            <!-- <buildArg>-\-static</buildArg>-->
+            <buildArg>--static</buildArg>
             <!-- <buildArg>-\-libc=musl</buildArg>-->
-            <buildArg>-H:+StaticExecutableWithDynamicLibC</buildArg>
+            <!-- <buildArg>-H:+StaticExecutableWithDynamicLibC</buildArg>-->
             <buildArg>-Djava.net.preferIPv4Stack=true</buildArg>
             <buildArg>-H:+ReportExceptionStackTraces</buildArg>
             <buildArg>-H:+PrintClassInitialization</buildArg>
