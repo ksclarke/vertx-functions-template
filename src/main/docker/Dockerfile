@@ -39,8 +39,8 @@ COPY /maven/ .
 RUN mvn -ntp -q -B package -DskipBuild=false
 
 # Set up the image to which to copy our build artifacts
-#FROM ksclarke/alpine-glibc:latest
-FROM alpine:latest
+FROM ksclarke/alpine-glibc:latest
+#FROM alpine:latest
 
 LABEL maintainer="Kevin S. Clarke <ksclarke@ksclarke.io>"
 
