@@ -11,13 +11,14 @@
   <properties>
     <!-- Code build properties -->
     <vertx.version>4.0.0</vertx.version>
-    <graalvm.version>20.3.0</graalvm.version>
+    <graalvm.version>21.0.0</graalvm.version>
 
     <!-- Docker build properties -->
-    <maven.version>3.6.3</maven.version>
-    <maven.checksum>c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0</maven.checksum>
-    <graalvm.jdk.version>java11</graalvm.jdk.version>
-    <alpine.version>3.12.3</alpine.version>
+    <alpine.version>3.13.1</alpine.version>
+    <builder.version>0.0.3</builder.version>
+
+    <!-- Whether UPX should be used to compress the application -->
+    <use.upx>true</use.upx>
 
     <!-- The AWS Lambda's main verticle -->
     <vertx.verticle>info.freelibrary.vertx.lambda.HttpVerticle</vertx.verticle>
@@ -132,11 +133,10 @@
         <configuration>
           <imageName>bootstrap</imageName>
           <mainClass>${vertx.verticle}</mainClass>
+          <skip>${skipBuild}</skip>
           <buildArgs>
             <buildArg>--static</buildArg>
-            <!-- <buildArg>-\-libc=musl</buildArg>-->
-            <!-- <buildArg>-H:+StaticExecutableWithDynamicLibC</buildArg>-->
-            <buildArg>-Djava.net.preferIPv4Stack=true</buildArg>
+            <buildArg>--libc=musl</buildArg>
             <buildArg>-H:+ReportExceptionStackTraces</buildArg>
             <buildArg>-H:+PrintClassInitialization</buildArg>
           </buildArgs>
@@ -164,12 +164,10 @@
               <name>${docker.registry.account}${project.artifactId}:%l</name>
               <build>
                 <args>
-                  <PROJECT_NAME>${project.artifactId}</PROJECT_NAME>
-                  <GRAALVM_TAG>${graalvm.version}-${graalvm.jdk.version}</GRAALVM_TAG>
-                  <GRAALVM_HOME>/opt/graalvm-ce-${graalvm.jdk.version}-${graalvm.version}</GRAALVM_HOME>
-                  <MAVEN_CHECKSUM>${maven.checksum}</MAVEN_CHECKSUM>
-                  <MAVEN_VERSION>${maven.version}</MAVEN_VERSION>
                   <ALPINE_TAG>${alpine.version}</ALPINE_TAG>
+                  <BUILDER_TAG>${builder.version}</BUILDER_TAG>
+                  <PROJECT_NAME>${project.artifactId}</PROJECT_NAME>
+                  <USE_UPX>${use.upx}</USE_UPX>
                 </args>
                 <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
                 <assembly>

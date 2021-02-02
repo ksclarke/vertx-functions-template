@@ -3,6 +3,7 @@
 target
 build
 lib_managed
+.flattened-pom.xml
 
 # Runtime files to ignore
 .vertx
