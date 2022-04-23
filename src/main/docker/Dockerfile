@@ -31,4 +31,6 @@ ARG PROJECT_NAME
 COPY --from=builder /opt/${PROJECT_NAME}/target/bootstrap /usr/bin/bootstrap
 COPY --from=builder /etc/default/cacerts /etc/default/cacerts
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+EXPOSE ${http.port}
+
+CMD /usr/bin/bootstrap

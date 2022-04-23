@@ -1,32 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>vertx-lambda-service</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <artifactId>vertx-native-functions</artifactId>
+  <version>${revision}</version>
 
-  <name>An AWS Lambda Vert.x Service</name>
+  <name>Vert.x Native Functions</name>
 
   <properties>
+    <!-- Application build properties -->
+    <http.port>8888</http.port>
+
     <!-- Code build properties -->
-    <vertx.version>4.0.0</vertx.version>
-    <graalvm.version>21.0.0</graalvm.version>
+    <vertx.version>4.2.7</vertx.version>
+    <freelib.utils.version>3.0.1</freelib.utils.version>
 
     <!-- Docker build properties -->
-    <alpine.version>3.13.1</alpine.version>
-    <builder.version>0.0.3</builder.version>
+    <alpine.version>3.15.4</alpine.version>
+    <builder.version>0.0.8</builder.version>
 
     <!-- Whether UPX should be used to compress the application -->
     <use.upx>true</use.upx>
 
     <!-- The AWS Lambda's main verticle -->
-    <vertx.verticle>info.freelibrary.vertx.lambda.HttpVerticle</vertx.verticle>
+    <vertx.verticle>info.freelibrary.vertx.functions.HttpVerticle</vertx.verticle>
 
     <!-- Plugin versions -->
-    <vertx.plugin.version>1.0.23</vertx.plugin.version>
-    <deploy.plugin.version>3.0.0-M1</deploy.plugin.version>
-    <docker.plugin.version>0.34.1</docker.plugin.version>
+    <vertx.plugin.version>1.0.27</vertx.plugin.version>
+    <deploy.plugin.version>2.8.2</deploy.plugin.version>
+    <docker.plugin.version>0.39.1</docker.plugin.version>
+    <graalvm.plugin.version>0.9.11</graalvm.plugin.version>
 
     <!-- Maven build properties -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -59,7 +62,24 @@
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-config</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-openapi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.freelibrary</groupId>
+      <artifactId>freelib-utils</artifactId>
+      <version>${freelib.utils.version}</version>
     </dependency>
 
     <!-- Test dependencies -->
@@ -77,6 +97,19 @@
 
   <build>
     <plugins>
+      <!-- Generate our MessageCodes class from the messages resource file -->
+      <plugin>
+        <groupId>info.freelibrary</groupId>
+        <artifactId>freelib-maven-plugins</artifactId>
+        <executions>
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>generate-codes</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <executions>
@@ -119,13 +152,37 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.graalvm.nativeimage</groupId>
-        <artifactId>native-image-maven-plugin</artifactId>
-        <version>${graalvm.version}</version>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <!-- Resource bundle for freelib-utils dependency -->
+                <artifactItem>
+                  <groupId>info.freelibrary</groupId>
+                  <artifactId>freelib-utils</artifactId>
+                  <version>${freelib.utils.version}</version>
+                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                  <includes>**\/freelib-util_messages.xml</includes>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+        <version>${graalvm.plugin.version}</version>
         <executions>
           <execution>
             <goals>
-              <goal>native-image</goal>
+              <goal>build</goal>
             </goals>
             <phase>package</phase>
           </execution>
@@ -142,15 +199,16 @@
           </buildArgs>
         </configuration>
       </plugin>
+
       <!-- Disable standard deploy; we publish a Docker image, not Jar file -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
         <version>${deploy.plugin.version}</version>
         <configuration>
           <skip>true</skip>
         </configuration>
       </plugin>
+
       <!-- A Maven plugin that can build a Docker image with our application -->
       <plugin>
         <groupId>io.fabric8</groupId>
@@ -197,7 +255,7 @@
   <parent>
     <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>6.3.0</version>
+    <version>7.2.2</version>
   </parent>
 
 </project>
