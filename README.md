@@ -1,4 +1,4 @@
-# vertx-lambda-service
+# vertx-native-functions
 
 This is an experiment / work-in-progress. Nothing to see here yet.
 
@@ -18,4 +18,4 @@ To build the Docker image that's produced by this project, run:
 
 ### Contact Information
 
-If you notice something that is broken or that needs fixing, please submit a ticket to the project's [issues queue](https://github.com/ksclarke/vertx-lambda-service/issues). If you have a question or a general comment about the project, please use the project's [discussion board](https://github.com/ksclarke/vertx-lambda-service/discussions).
+If you notice something that is broken or that needs fixing, please submit a ticket to the project's [issues queue](https://github.com/ksclarke/vertx-native-functions/issues). If you have a question or a general comment about the project, please use the project's [discussion board](https://github.com/ksclarke/vertx-native-functions/discussions).
