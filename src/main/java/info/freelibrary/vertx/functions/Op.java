@@ -3,7 +3,7 @@ package info.freelibrary.vertx.functions;
 /**
  * Constants used in functions.
  */
-final class FunctionConstants {
+final class Op {
 
     /**
      * An operation ID for invoking functions.
@@ -13,7 +13,7 @@ final class FunctionConstants {
     /**
      * Creates a new constants class for functions.
      */
-    private FunctionConstants() {
+    private Op() {
         // This is intentionally left empty.
     }
 
