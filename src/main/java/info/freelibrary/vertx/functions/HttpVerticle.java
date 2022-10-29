@@ -1,44 +1,72 @@
 
 package info.freelibrary.vertx.functions;
 
+import static info.freelibrary.util.Constants.INADDR_ANY;
+
+import info.freelibrary.util.Env;
 import info.freelibrary.util.Logger;
 import info.freelibrary.util.LoggerFactory;
 
-import io.vertx.config.ConfigRetriever;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.logging.SLF4JLogDelegateFactory;
+import io.vertx.ext.web.Router;
 import io.vertx.ext.web.openapi.RouterBuilder;
 
 /**
- * A default application verticle.
+ * A default verticle that runs our functions.
  */
 public class HttpVerticle extends AbstractVerticle {
+
+    /** The logger class name property used to configure which logger implementation should be used. */
+    public static final String LOGGER_CLASS_NAME = "vertx.logger-delegate-factory-class-name";
+
+    /** The application's base cache directory. */
+    public static final String CACHE_DIRECTORY = "vertx.cacheDirBase";
+
+    /** The configuration file for the application's loggers. */
+    public static final String LOGGING_CONFIG = "logback.configurationFile";
 
     /** The HTTP server's logger. */
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpVerticle.class, MessageCodes.BUNDLE);
 
-    /** The location of the OpenAPI specification. */
-    private static final String API_SPEC = "vertx-functions.yaml";
-
     @Override
     public void start(final Promise<Void> aPromise) {
-        ConfigRetriever.create(vertx).getConfig().compose(config -> {
-            return RouterBuilder.create(vertx, API_SPEC).compose(new Routes()).compose(new Server(vertx, config));
-        }).onSuccess(aPromise::complete).onFailure(aPromise::fail);
+        final HttpServerOptions serverOpts = new HttpServerOptions().setCompressionSupported(true);
+        final String apiConfig = Env.get(Configs.OPENAPI_SPEC, "target/classes/openapi.yaml");
+        final int port = Env.get(Configs.HTTP_PORT, 8888);
+        final Vertx vertx = getVertx();
+
+        RouterBuilder.create(vertx, apiConfig).onSuccess(builder -> {
+            final Router router = new OperationInitializer(builder).getRouter();
+
+            vertx.createHttpServer(serverOpts).requestHandler(router).listen(port, INADDR_ANY).onSuccess(server -> {
+                LOGGER.info(MessageCodes.vnf_001, server.actualPort());
+                aPromise.complete();
+            }).onFailure(aPromise::fail);
+        }).onFailure(details -> aPromise.fail(new ConfigurationException(details, MessageCodes.vnf_003, apiConfig)));
     }
 
+    /**
+     * Runs the verticle as the main program.
+     *
+     * @param aArgsArray An array of arguments
+     */
     @SuppressWarnings("uncommentedmain")
     public static void main(final String[] aArgsArray) {
-        // aArgsArray will contain information about verticles to deploy
+        // We pre-configure all this because we control the container this is running in
+        System.setProperty(CACHE_DIRECTORY, "/tmp/.vertx-cache");
+        System.setProperty(LOGGING_CONFIG, "logback.xml");
+        System.setProperty(LOGGER_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
+
+        // This (below) is needed for the serialization / encoding of certain JsonObject(s)
+        // DatabindCodec.mapper().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
         // Deploy the main verticle that responds to incoming requests
-        Vertx.vertx().deployVerticle(new HttpVerticle(), deployment -> {
-            if (deployment.failed()) {
-                final Throwable error = deployment.cause();
-                LOGGER.error(error, MessageCodes.VNF_002, error.getMessage());
-            }
+        Vertx.vertx().deployVerticle(new HttpVerticle()).onFailure(error -> {
+            LOGGER.error(error, MessageCodes.vnf_002, error.getMessage());
         });
     }
-
 }

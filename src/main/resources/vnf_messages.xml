@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+  <!-- Define message codes class name -->
+  <entry key="message-class-name">info.freelibrary.vertx.functions.MessageCodes</entry>
+
+  <!-- Vert.x function messages -->
+  <entry key="vnf-000">{}</entry>
+  <entry key="vnf-001">Vert.x Native Functions now running at port: {}</entry>
+  <entry key="vnf-002">Vert.x Native Functions failed to start: {}</entry>
+  <entry key="vnf-003">OpenAPI configuration file was not found: {}</entry>
+  <entry key="vnf-004">Initializing a new '{}' handler for {} requests to '{}'</entry>
+  <entry key="vnf-005">Skipping '{}' handler configuration for '{}' (duplicate)</entry>
+  <entry key="vnf-006">Hello World!</entry>
+
+</properties>

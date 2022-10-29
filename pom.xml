@@ -7,33 +7,57 @@
 
   <name>Vert.x Native Functions</name>
 
-  <properties>
-    <!-- Application build properties -->
-    <http.port>8888</http.port>
+  <developers>
+    <developer>
+      <id>ksclarke</id>
+      <name>Kevin S. Clarke</name>
+      <email>ksclarke@ksclarke.io</email>
+      <timezone>America/New_York</timezone>
+    </developer>
+  </developers>
 
+  <licenses>
+    <license>
+      <name>Mozilla Public License 2.0</name>
+      <url>https://opensource.org/licenses/MPL-2.0</url>
+    </license>
+  </licenses>
+
+  <properties>
     <!-- Code build properties -->
-    <vertx.version>4.2.7</vertx.version>
-    <freelib.utils.version>3.0.1</freelib.utils.version>
+    <vertx.version>4.3.4</vertx.version>
+    <freelib.utils.version>3.3.0</freelib.utils.version>
+    <jackson.databind.version>2.14.0-rc2</jackson.databind.version>
+
+    <!-- Test-related versions -->
+    <junit.version>5.9.1</junit.version>
 
     <!-- Docker build properties -->
-    <alpine.version>3.15.4</alpine.version>
-    <builder.version>0.0.8</builder.version>
+    <alpine.version>3.16.2</alpine.version>
+    <builder.version>0.0.9</builder.version>
+    <watchdog.version>0.9.8</watchdog.version>
 
     <!-- Whether UPX should be used to compress the application -->
     <use.upx>true</use.upx>
 
-    <!-- The AWS Lambda's main verticle -->
+    <!-- The main verticle -->
     <vertx.verticle>info.freelibrary.vertx.functions.HttpVerticle</vertx.verticle>
 
     <!-- Plugin versions -->
-    <vertx.plugin.version>1.0.27</vertx.plugin.version>
+    <vertx.plugin.version>1.0.28</vertx.plugin.version> <!-- io.reactiverse:vertx-maven-plugin -->
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
-    <docker.plugin.version>0.39.1</docker.plugin.version>
-    <graalvm.plugin.version>0.9.11</graalvm.plugin.version>
+    <docker.plugin.version>0.40.2</docker.plugin.version>
+    <graalvm.plugin.version>0.9.13</graalvm.plugin.version>
 
     <!-- Maven build properties -->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <skipBuild>true</skipBuild>
+
+    <!-- What level of logging we want to see, by default, in our tests and default container config -->
+    <logLevel>INFO</logLevel>
+    <testLogLevel>ERROR</testLogLevel>
+
+    <!-- An escaped variable delimiter -->
+    <escapedVarDelim>$</escapedVarDelim>
 
     <!-- The Docker registry user and password used for publishing images -->
     <docker.registry.username />
@@ -41,6 +65,11 @@
 
     <!-- The Docker registry account, if supplied, must end with a slash (e.g. "account/") -->
     <docker.registry.account />
+
+    <!-- Values to supply to the OpenAPI specification -->
+    <openfaas.url>http://lisforge.net:8080</openfaas.url>
+    <api.license.name>Mozilla Public License 2.0</api.license.name>
+    <api.license.url>https://opensource.org/licenses/MPL-2.0</api.license.url>
   </properties>
 
   <dependencyManagement>
@@ -49,6 +78,13 @@
         <groupId>io.vertx</groupId>
         <artifactId>vertx-stack-depchain</artifactId>
         <version>${vertx.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -66,10 +102,6 @@
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-config</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
       <artifactId>vertx-web-client</artifactId>
     </dependency>
     <dependency>
@@ -77,26 +109,83 @@
       <artifactId>vertx-web-openapi</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.databind.version}</version> <!--$NO-MVN-MAN-VER$-->
+    </dependency>
+    <dependency>
       <groupId>info.freelibrary</groupId>
       <artifactId>freelib-utils</artifactId>
       <version>${freelib.utils.version}</version>
     </dependency>
-
-    <!-- Test dependencies -->
     <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <!-- The default scope from the parent is 'test' so we have to override here -->
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <!-- The default scope from the parent is 'test' so we have to override here -->
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Below dependencies only used for testing -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-junit5</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+
+      <!-- We can also override the default logging configuration with a file in our root project directory -->
+      <testResource>
+        <directory>${basedir}</directory>
+        <includes>
+          <include>logback-test.xml</include>
+        </includes>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <configuration>
+          <portNames>
+            <portName>test.http.port</portName>
+          </portNames>
+        </configuration>
+        <executions>
+          <execution>
+            <id>reserve-port</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>reserve-network-port</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Generate our MessageCodes class from the messages resource file -->
       <plugin>
         <groupId>info.freelibrary</groupId>
@@ -107,6 +196,23 @@
             <goals>
               <goal>generate-codes</goal>
             </goals>
+            <configuration>
+              <messageFiles>
+                <messageFile>src/main/resources/vnf_messages.xml</messageFile>
+                <messageFile>freelib-utils_messages.xml</messageFile>
+              </messageFiles>
+              <createPropertiesFile>true</createPropertiesFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-media-types</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate-mediatype</goal>
+            </goals>
+            <configuration>
+              <mediaTypePackage>info.freelibrary.vertx.functions</mediaTypePackage>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -123,24 +229,17 @@
               <skipMain>${skipBuild}</skipMain>
             </configuration>
           </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>io.reactiverse</groupId>
-        <artifactId>vertx-maven-plugin</artifactId>
-        <version>${vertx.plugin.version}</version>
-        <executions>
           <execution>
-            <id>vertx</id>
+            <id>default-testCompile</id>
+            <phase>test-compile</phase>
             <goals>
-              <goal>initialize</goal>
-              <goal>package</goal>
+              <goal>testCompile</goal>
             </goals>
+            <configuration>
+              <skip>${skipBuild}</skip>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <redeploy>true</redeploy>
-        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -149,36 +248,20 @@
           <reuseForks>false</reuseForks>
           <skipTests>${skipBuild}</skipTests>
           <argLine>${jacoco.agent.arg}</argLine>
+          <systemProperties>
+            <logback.configurationFile>src/test/resources/logback-test.xml</logback.configurationFile>
+            <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
+          </systemProperties>
+          <environmentVariables>
+            <HTTP_PORT>${test.http.port}</HTTP_PORT>
+          </environmentVariables>
         </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>unpack</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>unpack</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <!-- Resource bundle for freelib-utils dependency -->
-                <artifactItem>
-                  <groupId>info.freelibrary</groupId>
-                  <artifactId>freelib-utils</artifactId>
-                  <version>${freelib.utils.version}</version>
-                  <outputDirectory>${project.build.directory}/classes</outputDirectory>
-                  <includes>**\/freelib-util_messages.xml</includes>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
         <version>${graalvm.plugin.version}</version>
+        <extensions>true</extensions>
         <executions>
           <execution>
             <goals>
@@ -188,14 +271,16 @@
           </execution>
         </executions>
         <configuration>
+          <metadataRepository>
+            <!-- TODO: Figure out how this works and use it! -->
+            <enabled>false</enabled>
+          </metadataRepository>
           <imageName>bootstrap</imageName>
           <mainClass>${vertx.verticle}</mainClass>
           <skip>${skipBuild}</skip>
           <buildArgs>
             <buildArg>--static</buildArg>
             <buildArg>--libc=musl</buildArg>
-            <buildArg>-H:+ReportExceptionStackTraces</buildArg>
-            <buildArg>-H:+PrintClassInitialization</buildArg>
           </buildArgs>
         </configuration>
       </plugin>
@@ -216,6 +301,7 @@
         <version>${docker.plugin.version}</version>
         <configuration>
           <verbose>true</verbose>
+          <showLogs>true</showLogs>
           <images>
             <image>
               <!-- Registry account, if supplied, must end in a slash (e.g. "account/") -->
@@ -224,6 +310,7 @@
                 <args>
                   <ALPINE_TAG>${alpine.version}</ALPINE_TAG>
                   <BUILDER_TAG>${builder.version}</BUILDER_TAG>
+                  <WATCHDOG_TAG>${watchdog.version}</WATCHDOG_TAG>
                   <PROJECT_NAME>${project.artifactId}</PROJECT_NAME>
                   <USE_UPX>${use.upx}</USE_UPX>
                 </args>
@@ -247,15 +334,85 @@
               <goal>build</goal>
             </goals>
           </execution>
+          <execution>
+            <id>docker-deploy</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>push</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>live</id>
+      <properties>
+        <!--<maven.test.skip>true</maven.test.skip>
+        <jacoco.skip>true</jacoco.skip>-->
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.reactiverse</groupId>
+            <artifactId>vertx-maven-plugin</artifactId>
+            <version>${vertx.plugin.version}</version>
+            <configuration>
+              <redeploy>true</redeploy>
+            </configuration>
+            <executions>
+              <execution>
+                <id>vertx</id>
+                <goals>
+                  <goal>initialize</goal>
+                  <goal>package</goal>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-logging-config-for-testing</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${basedir}/target/classes/</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${basedir}/src/main/resources</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>fester.yaml</include>
+                      </includes>
+                    </resource>
+                    <resource>
+                      <directory>${basedir}</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>logback-test.xml</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
   <parent>
-    <artifactId>freelib-parent</artifactId>
     <groupId>info.freelibrary</groupId>
-    <version>7.2.2</version>
+    <artifactId>freelib-parent</artifactId>
+    <version>7.4.2</version>
   </parent>
 
 </project>
