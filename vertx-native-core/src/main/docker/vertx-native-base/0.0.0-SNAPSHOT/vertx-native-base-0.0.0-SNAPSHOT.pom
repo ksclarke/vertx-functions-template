@@ -1,32 +1,25 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
+  <parent>
+    <groupId>info.freelibrary</groupId>
+    <artifactId>freelib-parent</artifactId>
+    <version>7.4.2</version>
+  </parent>
+  <groupId>info.freelibrary</groupId>
   <artifactId>vertx-native-base</artifactId>
-  <version>${revision}</version>
+  <version>0.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Vert.x Native Base</name>
   <description>A Vert.x template for OpenFaaS functions</description>
   <url>https://github.com/ksclarke/vertx-native-functions</url>
-
   <licenses>
-    <!-- License applies just to this build template's code: not your function specific code -->
     <license>
       <name>Mozilla Public License 2.0</name>
       <url>https://opensource.org/licenses/MPL-2.0</url>
     </license>
   </licenses>
-
-  <scm>
-    <connection>scm:git:git@github.com:ksclarke/vertx-native-functions.git</connection>
-    <developerConnection>scm:git:git@github.com:ksclarke/vertx-native-functions.git</developerConnection>
-    <url>git@github.com:ksclarke/vertx-native-functions.git</url>
-  </scm>
-
-  <issueManagement>
-    <system>GitHub</system>
-    <url>https://github.com/ksclarke/vertx-native-functions/issues</url>
-  </issueManagement>
-
   <developers>
     <developer>
       <id>ksclarke</id>
@@ -36,20 +29,24 @@
       <timezone>America/New_York</timezone>
     </developer>
   </developers>
-
+  <modules>
+    <module>vertx-native-core</module>
+  </modules>
+  <scm>
+    <connection>scm:git:git@github.com:ksclarke/vertx-native-functions.git</connection>
+    <developerConnection>scm:git:git@github.com:ksclarke/vertx-native-functions.git</developerConnection>
+    <url>git@github.com:ksclarke/vertx-native-functions.git</url>
+  </scm>
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/ksclarke/vertx-native-functions/issues</url>
+  </issueManagement>
   <properties>
-    <revision>0.0.0-SNAPSHOT</revision>
-
-    <!-- Compile-related dependencies -->
+    <vertx.plugin.version>1.0.28</vertx.plugin.version>
     <vertx.version>4.3.4</vertx.version>
-
-    <!-- Test-related dependencies -->
     <junit.version>5.9.1</junit.version>
-
-    <!-- Plugin dependency versions -->
-    <vertx.plugin.version>1.0.28</vertx.plugin.version> <!-- io.reactiverse:vertx-maven-plugin -->
+    <revision>0.0.0-SNAPSHOT</revision>
   </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -68,11 +65,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-
-  <modules>
-    <module>vertx-native-core</module>
-  </modules>
-
   <build>
     <pluginManagement>
       <plugins>
@@ -84,11 +76,4 @@
       </plugins>
     </pluginManagement>
   </build>
-
-  <parent>
-    <groupId>info.freelibrary</groupId>
-    <artifactId>freelib-parent</artifactId>
-    <version>8.0.0</version>
-  </parent>
-
 </project>

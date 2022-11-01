@@ -20,6 +20,11 @@ ARG USE_UPX
 WORKDIR /opt/${PROJECT_NAME}
 COPY /maven/ .
 
+# Set up the parent project in the container's Maven repository
+RUN mkdir -p /root/.m2/repository/info/freelibrary && \
+  cp -r src/main/docker/vertx-native-base /root/.m2/repository/info/freelibrary/
+
+# Build project using GraalVM's native-image
 RUN mvn -ntp -B package -DskipBuild=false -DlogLevel=DEBUG -DtestLogLevel=DEBUG && \
   if [ "${USE_UPX}" = true ] ; then \
     upx --best -q /opt/${PROJECT_NAME}/target/bootstrap ; \

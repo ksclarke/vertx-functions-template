@@ -1,8 +1,8 @@
 
 # Build artifacts to ignore
-target
-build
-lib_managed
+target/
+build/
+lib_managed/
 .flattened-pom.xml
 
 # Runtime files to ignore

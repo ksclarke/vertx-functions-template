@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>info.freelibrary</groupId>
+  <artifactId>vertx-native-base</artifactId>
+  <version>0.0.0-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <localCopy>true</localCopy>
+    </snapshot>
+    <lastUpdated>20221029190035</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>0.0.0-SNAPSHOT</value>
+        <updated>20221029190035</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>
