@@ -1,5 +1,5 @@
 
-package info.freelibrary.vertx.functions;
+package info.freelibrary.vertx.functions.example;
 
 import java.util.Set;
 

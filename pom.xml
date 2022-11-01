@@ -9,7 +9,6 @@
   <url>https://github.com/ksclarke/vertx-native-functions</url>
 
   <licenses>
-    <!-- License applies just to this build template's code: not your function specific code -->
     <license>
       <name>Mozilla Public License 2.0</name>
       <url>https://opensource.org/licenses/MPL-2.0</url>
