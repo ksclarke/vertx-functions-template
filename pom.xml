@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>vertx-native-base</artifactId>
+  <artifactId>vertx-functions-template</artifactId>
   <version>${revision}</version>
   <packaging>pom</packaging>
-  <name>Vert.x Native Base</name>
+  <name>Vert.x Functions Template</name>
   <description>A Vert.x template for OpenFaaS functions</description>
-  <url>https://github.com/ksclarke/vertx-native-functions</url>
+  <url>https://github.com/ksclarke/vertx-functions-template</url>
 
   <licenses>
     <license>
@@ -16,14 +16,14 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:ksclarke/vertx-native-functions.git</connection>
-    <developerConnection>scm:git:git@github.com:ksclarke/vertx-native-functions.git</developerConnection>
-    <url>git@github.com:ksclarke/vertx-native-functions.git</url>
+    <connection>scm:git:git@github.com:ksclarke/vertx-functions-template.git</connection>
+    <developerConnection>scm:git:git@github.com:ksclarke/vertx-functions-template.git</developerConnection>
+    <url>git@github.com:ksclarke/vertx-functions-template.git</url>
   </scm>
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/ksclarke/vertx-native-functions/issues</url>
+    <url>https://github.com/ksclarke/vertx-functions-template/issues</url>
   </issueManagement>
 
   <developers>
@@ -41,12 +41,16 @@
 
     <!-- Compile-related dependencies -->
     <vertx.version>4.3.4</vertx.version>
+    <logback.version>1.4.0</logback.version>
+    <freelib.utils.version>3.3.0</freelib.utils.version>
+    <jackson.databind.version>2.14.0-rc2</jackson.databind.version>
 
     <!-- Test-related dependencies -->
     <junit.version>5.9.1</junit.version>
 
     <!-- Plugin dependency versions -->
     <vertx.plugin.version>1.0.28</vertx.plugin.version> <!-- io.reactiverse:vertx-maven-plugin -->
+    <flatten.plugin.version>1.2.7</flatten.plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -65,11 +69,34 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.databind.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>info.freelibrary</groupId>
+        <artifactId>freelib-utils</artifactId>
+        <version>${freelib.utils.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <version>${logback.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>${logback.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <modules>
-    <module>vertx-native-core</module>
+    <module>vertx-functions-core</module>
+    <module>vertx-functions-example</module>
+    <module>vertx-functions-builder</module>
   </modules>
 
   <build>
@@ -79,6 +106,83 @@
           <groupId>io.reactiverse</groupId>
           <artifactId>vertx-maven-plugin</artifactId>
           <version>${vertx.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <configuration>
+            <portNames>
+              <portName>test.http.port</portName>
+            </portNames>
+          </configuration>
+          <executions>
+            <execution>
+              <id>reserve-port</id>
+              <phase>initialize</phase>
+              <goals>
+                <goal>reserve-network-port</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <forkCount>1</forkCount>
+            <reuseForks>false</reuseForks>
+            <skipTests>${skipBuild}</skipTests>
+            <argLine>${jacoco.agent.arg}</argLine>
+            <systemProperties>
+              <logback.configurationFile>src/test/resources/logback-test.xml</logback.configurationFile>
+              <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.SLF4JLogDelegateFactory</vertx.logger-delegate-factory-class-name>
+            </systemProperties>
+            <environmentVariables>
+              <HTTP_PORT>${test.http.port}</HTTP_PORT>
+            </environmentVariables>
+          </configuration>
+        </plugin>
+        <!-- This plugin is required to make the version persist to the POM on publishing -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>${flatten.plugin.version}</version>
+          <configuration>
+            <updatePomFile>true</updatePomFile>
+            <flattenMode>resolveCiFriendliesOnly</flattenMode>
+          </configuration>
+          <executions>
+            <execution>
+              <id>flatten</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>flatten</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>flatten-clean</id>
+              <phase>clean</phase>
+              <goals>
+                <goal>clean</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Generate our MessageCodes class from the messages resource file -->
+        <plugin>
+          <groupId>info.freelibrary</groupId>
+          <artifactId>freelib-maven-plugins</artifactId>
+          <executions>
+            <execution>
+              <id>generate-media-types</id>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>generate-mediatype</goal>
+              </goals>
+              <configuration>
+                <mediaTypePackage>info.freelibrary.vertx.functions</mediaTypePackage>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>vertx-functions-example</artifactId>
+  <name>An Example Function</name>
+
+  <!-- This is the version of the code, which also is the version of the API -->
+  <version>0.0.1-SNAPSHOT</version>
+
+  <licenses>
+    <!-- This is the license for the function's code -->
+    <license>
+      <name>Mozilla Public License 2.0</name>
+      <url>https://opensource.org/licenses/MPL-2.0</url>
+    </license>
+  </licenses>
+
+  <properties>
+    <!-- We skip the no-snapshots rule because during dev our vertx-native-core module is a snapshot -->
+    <enforcer.skip>true</enforcer.skip>
+
+    <!-- Values used in the OpenAPI specification's file -->
+    <api.server.url>http://lisforge.net:8080</api.server.url>
+    <api.license.name>Mozilla Public License 2.0</api.license.name>
+    <api.license.url>https://opensource.org/licenses/MPL-2.0</api.license.url>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.freelibrary</groupId>
+      <artifactId>freelib-utils</artifactId>
+    </dependency>
+
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- The below dependency is the artifact of another module in this project -->
+    <dependency>
+      <groupId>info.freelibrary</groupId>
+      <artifactId>vertx-functions-core</artifactId>
+      <version>${revision}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+
+      <!-- We can also override the default logging configuration with a file in our root project directory -->
+      <testResource>
+        <directory>${basedir}</directory>
+        <includes>
+          <include>logback-test.xml</include>
+        </includes>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>info.freelibrary</groupId>
+        <artifactId>freelib-maven-plugins</artifactId>
+        <executions>
+          <execution>
+            <id>generate-media-types</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate-mediatype</goal>
+            </goals>
+            <configuration>
+              <mediaTypePackage>info.freelibrary.vertx.functions</mediaTypePackage>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-logging-config-for-testing</id>
+            <phase>test</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/main/resources</directory>
+                  <filtering>true</filtering>
+                  <includes>
+                    <include>openapi.yaml</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>${basedir}</directory>
+                  <filtering>true</filtering>
+                  <includes>
+                    <include>logback-test.xml</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-artifact-to-builder</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/../vertx-functions-builder/src/main/docker/libs/</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>${project.artifactId}-${project.version}.jar</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <parent>
+    <groupId>info.freelibrary</groupId>
+    <artifactId>vertx-functions-template</artifactId>
+    <version>${revision}</version>
+  </parent>
+
+</project>

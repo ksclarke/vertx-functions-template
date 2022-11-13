@@ -1,0 +1,1 @@
+### This directory is for the project's artifacts. They will be copied into the Docker container.

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>vertx-functions-core</artifactId>
+  <name>Vert.x Functions Core</name>
+
+  <developers>
+    <developer>
+      <id>ksclarke</id>
+      <name>Kevin S. Clarke</name>
+      <email>ksclarke@ksclarke.io</email>
+      <timezone>America/New_York</timezone>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>Mozilla Public License 2.0</name>
+      <url>https://opensource.org/licenses/MPL-2.0</url>
+    </license>
+  </licenses>
+
+  <properties>
+    <vertx.verticle>info.freelibrary.vertx.functions.HttpVerticle</vertx.verticle>
+
+    <!-- Plugin versions -->
+    <deploy.plugin.version>2.8.2</deploy.plugin.version>
+
+    <!-- What level of logging we want to see, by default, in our tests and default container config -->
+    <logLevel>INFO</logLevel>
+    <testLogLevel>ERROR</testLogLevel>
+
+    <!-- An escaped variable delimiter -->
+    <escapedVarDelim>$</escapedVarDelim>
+
+    <!-- Values to use in the OpenAPI specification -->
+    <api.server.url>http://lisforge.net:8080</api.server.url>
+    <api.license.name>Mozilla Public License 2.0</api.license.name>
+    <api.license.url>https://opensource.org/licenses/MPL-2.0</api.license.url>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-openapi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.freelibrary</groupId>
+      <artifactId>freelib-utils</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+
+    <!-- Below dependencies only used for testing -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+
+      <!-- We can also override the default logging configuration with a file in our root project directory -->
+      <testResource>
+        <directory>${basedir}</directory>
+        <includes>
+          <include>logback-test.xml</include>
+        </includes>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      <!-- Generate our MessageCodes class from the messages resource file -->
+      <plugin>
+        <groupId>info.freelibrary</groupId>
+        <artifactId>freelib-maven-plugins</artifactId>
+        <executions>
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>generate-codes</goal>
+            </goals>
+            <configuration>
+              <messageFiles>
+                <messageFile>src/main/resources/vnf_messages.xml</messageFile>
+                <messageFile>freelib-utils_messages.xml</messageFile>
+              </messageFiles>
+              <createPropertiesFile>true</createPropertiesFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+
+      <!-- Disable standard deploy; we don't need to push to Maven Central -->
+      <plugin>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>${deploy.plugin.version}</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>live</id>
+      <properties>
+        <!--<maven.test.skip>true</maven.test.skip>
+        <jacoco.skip>true</jacoco.skip>-->
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.reactiverse</groupId>
+            <artifactId>vertx-maven-plugin</artifactId>
+            <configuration>
+              <redeploy>true</redeploy>
+            </configuration>
+            <executions>
+              <execution>
+                <id>vertx</id>
+                <goals>
+                  <goal>initialize</goal>
+                  <goal>package</goal>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-logging-config-for-testing</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${basedir}/target/classes/</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${basedir}/src/main/resources</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>openapi.yaml</include>
+                      </includes>
+                    </resource>
+                    <resource>
+                      <directory>${basedir}</directory>
+                      <filtering>true</filtering>
+                      <includes>
+                        <include>logback-test.xml</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+              <execution>
+                <id>copy-artifact-to-builder</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${basedir}/../vertx-functions-builder/src/main/docker/libs/</outputDirectory>
+                  <overwrite>true</overwrite>
+                  <resources>
+                    <resource>
+                      <directory>${project.build.directory}</directory>
+                      <includes>
+                        <include>${project.artifactId}-${project.version}.jar</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <parent>
+    <groupId>info.freelibrary</groupId>
+    <artifactId>vertx-functions-template</artifactId>
+    <version>${revision}</version>
+  </parent>
+
+</project>

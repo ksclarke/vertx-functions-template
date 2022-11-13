@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>vertx-functions-builder</artifactId>
+  <name>Vert.x Functions Builder</name>
+
+  <developers>
+    <developer>
+      <id>ksclarke</id>
+      <name>Kevin S. Clarke</name>
+      <email>ksclarke@ksclarke.io</email>
+      <timezone>America/New_York</timezone>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>Mozilla Public License 2.0</name>
+      <url>https://opensource.org/licenses/MPL-2.0</url>
+    </license>
+  </licenses>
+
+  <properties>
+    <!-- Docker build properties -->
+    <alpine.version>3.16.2</alpine.version>
+    <builder.version>0.0.9</builder.version>
+    <watchdog.version>0.9.8</watchdog.version>
+
+    <!-- Whether UPX should be used to compress the application -->
+    <use.upx>true</use.upx>
+
+    <!-- The main verticle -->
+    <vertx.verticle>info.freelibrary.vertx.functions.HttpVerticle</vertx.verticle>
+
+    <!-- Plugin versions -->
+    <deploy.plugin.version>2.8.2</deploy.plugin.version>
+    <docker.plugin.version>0.40.2</docker.plugin.version>
+    <graalvm.plugin.version>0.9.13</graalvm.plugin.version>
+
+    <!-- Maven build properties -->
+    <skipBuild>true</skipBuild>
+
+    <!-- The Docker registry user and password used for publishing images -->
+    <docker.registry.username />
+    <docker.registry.password />
+
+    <!-- The Docker registry account, if supplied, must end with a slash (e.g. "account/") -->
+    <docker.registry.account />
+    
+    <!-- Allow snapshot builds for dev purposes -->
+    <enforcer.skip>true</enforcer.skip>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>info.freelibrary</groupId>
+      <artifactId>vertx-functions-core</artifactId>
+      <version>${revision}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>info.freelibrary</groupId>
+      <artifactId>vertx-functions-example</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+            <configuration>
+              <skipMain>${skipBuild}</skipMain>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-testCompile</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+            <configuration>
+              <skip>${skipBuild}</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+        <version>${graalvm.plugin.version}</version>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <metadataRepository>
+            <!-- TODO: Figure out how this works and use it! -->
+            <enabled>false</enabled>
+          </metadataRepository>
+          <imageName>bootstrap</imageName>
+          <mainClass>${vertx.verticle}</mainClass>
+          <skip>${skipBuild}</skip>
+          <buildArgs>
+            <buildArg>--static</buildArg>
+            <buildArg>--libc=musl</buildArg>
+          </buildArgs>
+        </configuration>
+      </plugin>
+
+      <!-- Disable standard deploy; we publish a Docker image, not Jar file -->
+      <plugin>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>${deploy.plugin.version}</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+
+      <!-- A Maven plugin that can build a Docker image with our application -->
+      <plugin>
+        <groupId>io.fabric8</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>${docker.plugin.version}</version>
+        <configuration>
+          <verbose>true</verbose>
+          <showLogs>true</showLogs>
+          <images>
+            <image>
+              <!-- Registry account, if supplied, must end in a slash (e.g. "account/") -->
+              <name>${docker.registry.account}${project.artifactId}:%l</name>
+              <build>
+                <args>
+                  <ALPINE_TAG>${alpine.version}</ALPINE_TAG>
+                  <BUILDER_TAG>${builder.version}</BUILDER_TAG>
+                  <WATCHDOG_TAG>${watchdog.version}</WATCHDOG_TAG>
+                  <PROJECT_NAME>${project.artifactId}</PROJECT_NAME>
+                  <USE_UPX>${use.upx}</USE_UPX>
+                </args>
+                <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
+                <assembly>
+                  <descriptorRef>project</descriptorRef>
+                </assembly>
+              </build>
+            </image>
+          </images>
+          <authConfig>
+            <username>${docker.registry.username}</username>
+            <password>${docker.registry.password}</password>
+          </authConfig>
+        </configuration>
+        <executions>
+          <execution>
+            <id>docker-build</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>docker-deploy</id>
+            <phase>deploy</phase>
+            <goals>
+              <goal>push</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <parent>
+    <groupId>info.freelibrary</groupId>
+    <artifactId>vertx-functions-template</artifactId>
+    <version>${revision}</version>
+  </parent>
+
+</project>

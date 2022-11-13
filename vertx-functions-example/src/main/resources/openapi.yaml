@@ -1,0 +1,60 @@
+openapi: "3.0.3"
+info:
+  version: ${project.version}
+  title: ${project.name}
+  license:
+    name: ${api.license.name}
+    url: ${api.license.url}
+servers:
+  - url: ${api.server.url}
+paths:
+  /:
+    get:
+      summary: Gets the HelloWorld function's response
+      operationId: info.freelibrary.vertx.functions.HelloWorld
+      responses:
+        200:
+          description: A Hello World response
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<html><body><h3>Hello World!</h3></body></html>"
+        default:
+          description: An unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /echo:
+    get:
+      summary: Gets an echoed response
+      operationId: info.freelibrary.vertx.functions.example.Echo
+      responses:
+        200:
+          description: An echoed request response
+          content:
+            application/json:
+              schema:
+                type: object
+        default:
+          description: An unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 500
+        message:
+          type: string
+          example: There was an internal server error
