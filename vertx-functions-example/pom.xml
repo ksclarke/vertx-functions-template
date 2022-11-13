@@ -17,7 +17,7 @@
   </licenses>
 
   <properties>
-    <!-- We skip the no-snapshots rule because during dev our vertx-native-core module is a snapshot -->
+    <!-- We skip the no-snapshots rule because during dev our vertx-functions-core module is a snapshot -->
     <enforcer.skip>true</enforcer.skip>
 
     <!-- Values used in the OpenAPI specification's file -->

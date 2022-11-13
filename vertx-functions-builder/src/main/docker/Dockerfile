@@ -66,5 +66,5 @@ EXPOSE 8080
 # How do we tell if the container is still up and functioning as expected?
 HEALTHCHECK --interval=5s CMD [ -e /tmp/.lock ] || exit 1
 
-# The watchdog wrapper hands off incoming requests to vertx-native-functions
+# The watchdog wrapper hands off incoming requests to vertx-functions
 CMD ["fwatchdog"]

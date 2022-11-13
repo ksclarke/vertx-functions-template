@@ -2,7 +2,7 @@
 package info.freelibrary.vertx.functions;
 
 /**
- * Configuration property options for vertx-native-functions.
+ * Configuration property options for vertx-functions.
  */
 public final class Configs {
 

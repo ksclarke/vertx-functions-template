@@ -22,6 +22,7 @@ COPY /maven/ .
 
 # Set up the parent project in the container's Maven repository
 RUN mkdir -p /root/.m2/repository/info/freelibrary && \
+# FIXME
   cp -r src/main/docker/vertx-native-base /root/.m2/repository/info/freelibrary/
 
 # Build project using GraalVM's native-image

@@ -3,5 +3,5 @@ provider:
   name: openfaas
   gateway: http://lisforge.net:8080
 functions:
-  vertx-native-functions:
-    image: ksclarke/vertx-native-functions:latest
+  vertx-functions:
+    image: ksclarke/vertx-functions:latest
