@@ -11,23 +11,44 @@ ARG WATCHDOG_TAG
 FROM ghcr.io/openfaas/of-watchdog:${WATCHDOG_TAG} as watchdog
 
 # Set up a build environment to compile the application
-FROM ksclarke/maven-graalvm-musl:${BUILDER_TAG} AS builder
+FROM maven-graalvm-musl:${BUILDER_TAG} AS builder
 
-ARG PROJECT_NAME
 ARG USE_UPX
 
-# Run the Maven build
-WORKDIR /opt/${PROJECT_NAME}
-COPY /maven/ .
+# Hard-coded arguments to the build
+ARG PARENT_DIR="/opt/${project.parent.artifactId}"
+ARG PROJECT_DIR="${PARENT_DIR}/${project.artifactId}"
+ARG LIBS_DIR="src/main/docker/libs"
+ARG POM_NS="http://maven.apache.org/POM/4.0.0"
 
-# Set up the parent project in the container's Maven repository
-RUN mkdir -p /root/.m2/repository/info/freelibrary && \
-  cp -r src/main/docker/libs/* /root/.m2/repository/info/freelibrary/
+# Copy our Maven directory into the container
+WORKDIR "${PROJECT_DIR}"
+COPY "/maven/" .
+
+# Setup the parent project for our build
+WORKDIR "${PARENT_DIR}"
+RUN xmlstarlet ed -N pom="${POM_NS}" -d "//pom:modules/pom:module[text()!='${project.artifactId}']" \
+      "${PROJECT_DIR}/${LIBS_DIR}/.flattened-pom.xml" > "pom.xml"
+
+# Setup the builder project
+WORKDIR "${PROJECT_DIR}"
+RUN xmlstarlet ed -N pom="${POM_NS}" -u "//pom:parent/pom:version" -v "${project.version}" \
+    "pom.xml" > "/tmp/pom.xml" && mv "/tmp/pom.xml" "pom.xml" && \
+    mvn -ntp install:install-file -Dfile="pom.xml" -DgeneratePom="false" -DgroupId="${project.parent.groupId}" \
+      -DartifactId="${project.parent.artifactId}" -DpomFile="pom.xml" -Dpackaging="pom"
+
+# Install the builder project's local dependencies
+RUN mvn -ntp install:install-file -Dfile="${LIBS_DIR}/vertx-functions-core-${project.version}.jar" -Dpackaging="jar" \
+      -DgroupId="info.freelibrary" -DartifactId="vertx-functions-core" -Dversion="${project.version}" && \
+    mvn -ntp install:install-file -Dfile="${LIBS_DIR}/vertx-functions-example-0.0.1-SNAPSHOT.jar" -Dpackaging="jar" \
+      -DgroupId="info.freelibrary" -DartifactId="vertx-functions-example" -Dversion="0.0.1-SNAPSHOT"
+
+RUN ls -Rl /root/.m2/repository/info/freelibrary
 
 # Build project using GraalVM's native-image
-RUN mvn -ntp -B package -DskipBuild=false -DlogLevel=DEBUG -DtestLogLevel=DEBUG && \
+RUN mvn -ntp -B package -DskipBuild="false" -DlogLevel="DEBUG" -DtestLogLevel="DEBUG" -Drevision="${revision}" && \
   if [ "${USE_UPX}" = true ] ; then \
-    upx --best -q /opt/${PROJECT_NAME}/target/bootstrap ; \
+    upx --best -q "${PROJECT_DIR}/target/bootstrap" ; \
   fi
 
 # Set up the image to which to copy our build artifacts
@@ -39,13 +60,13 @@ ENV javax.net.ssl.trustAnchors /etc/default/cacerts
 # Application configuration
 ENV OPENAPI_SPEC openapi.yaml
 
-# We use project.artifactId (i.e. PROJECT_NAME) for many different purposes
-ARG PROJECT_NAME
+# The location of our project directory inside the build container
+ARG PROJECT_DIR="/opt/${project.parent.artifactId}/${project.artifactId}"
 
 COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
 RUN chmod +x /usr/bin/fwatchdog
 
-COPY --from=builder /opt/${PROJECT_NAME}/target/bootstrap /usr/bin/bootstrap
+COPY --from=builder ${PROJECT_DIR}/target/bootstrap /usr/bin/bootstrap
 COPY --from=builder /etc/default/cacerts /etc/default/cacerts
 
 # Set some environmental properties used by the watchdog wrapper
@@ -54,11 +75,11 @@ ENV mode="http"
 ENV fprocess="/usr/bin/bootstrap"
 
 # Setup our system user and their home directory
-WORKDIR "/home/${PROJECT_NAME}"
-RUN addgroup --system "${PROJECT_NAME}" \
-  && adduser --system --ingroup "${PROJECT_NAME}" "${PROJECT_NAME}" \
-  && chown -R "${PROJECT_NAME}" "/home/${PROJECT_NAME}"
-USER "${PROJECT_NAME}"
+WORKDIR "/home/${project.artifactId}"
+RUN addgroup --system "${project.artifactId}" \
+  && adduser --system --ingroup "${project.artifactId}" "${project.artifactId}" \
+  && chown -R "${project.artifactId}" "/home/${project.artifactId}"
+USER "${project.artifactId}"
 
 # This is the default outward facing port that OpenFaaS expects
 EXPOSE 8080

@@ -50,6 +50,7 @@
 
     <!-- Plugin dependency versions -->
     <vertx.plugin.version>1.0.28</vertx.plugin.version> <!-- io.reactiverse:vertx-maven-plugin -->
+    <clean.plugin.version>3.2.0</clean.plugin.version>
     <flatten.plugin.version>1.2.7</flatten.plugin.version>
   </properties>
 
@@ -103,6 +104,10 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${clean.plugin.version}</version>
+        </plugin>
+        <plugin>
           <groupId>io.reactiverse</groupId>
           <artifactId>vertx-maven-plugin</artifactId>
           <version>${vertx.plugin.version}</version>
@@ -141,6 +146,7 @@
             </environmentVariables>
           </configuration>
         </plugin>
+
         <!-- This plugin is required to make the version persist to the POM on publishing -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -167,6 +173,7 @@
             </execution>
           </executions>
         </plugin>
+
         <!-- Generate our MessageCodes class from the messages resource file -->
         <plugin>
           <groupId>info.freelibrary</groupId>
