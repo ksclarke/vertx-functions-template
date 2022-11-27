@@ -37,7 +37,11 @@
   </developers>
 
   <properties>
-    <revision>0.0.0-SNAPSHOT</revision>
+    <revision>0.0.1-SNAPSHOT</revision>
+    
+    <!-- Default values for the function; can also be overridden from the command line (e.g., setting version in CD)-->
+    <function.name>vertx-functions-example</function.name>
+    <function.version>0.0.1-SNAPSHOT</function.version>
 
     <!-- Compile-related dependencies -->
     <vertx.version>4.3.4</vertx.version>
@@ -96,7 +100,7 @@
 
   <modules>
     <module>vertx-functions-core</module>
-    <module>vertx-functions-example</module>
+    <module>vertx-functions-function</module>
     <module>vertx-functions-builder</module>
   </modules>
 
@@ -164,13 +168,6 @@
                 <goal>flatten</goal>
               </goals>
             </execution>
-            <execution>
-              <id>flatten-clean</id>
-              <phase>clean</phase>
-              <goals>
-                <goal>clean</goal>
-              </goals>
-            </execution>
           </executions>
         </plugin>
 
@@ -194,6 +191,65 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <profiles>
+    <profile>
+      <id>template-pom</id>
+      <activation>
+        <file>
+          <exists>.flattened-pom.xml</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-build-resources</id>
+                <configuration>
+                  <skip>true</skip>
+                </configuration>
+              </execution>
+              <!-- Copy the template project's flattened POM to the builder module's docker configs directory -->
+              <execution>
+                <id>copy-pom-to-builder</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${project.basedir}/vertx-functions-builder/src/main/docker/libs</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>${project.basedir}</directory>
+                      <includes>
+                        <include>.flattened-pom.xml</include>
+                      </includes>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>${projact.basedir}/vertx-functions-builder/src/main/docker/libs</directory>
+                  <includes>
+                    <include>.flattened-pom.xml</include>
+                    <include>*.jar</include>
+                  </includes>
+                </fileset>
+              </filesets>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <parent>
     <groupId>info.freelibrary</groupId>

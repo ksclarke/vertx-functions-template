@@ -2,11 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>vertx-functions-example</artifactId>
-  <name>An Example Function</name>
+  <!-- An example function that you'll change to suit your purposes -->
+  <artifactId>${function.name}</artifactId>
+  <name>Maven Lookup Function</name>
+  <description>A function to lookup a project's latest version in Maven</description>
 
-  <!-- This is the version of the code, which also is the version of the API -->
-  <version>0.0.1-SNAPSHOT</version>
+  <!-- This is not changed here, but by passing in '-Dfunction.version=[VERSION]' on the command line -->
+  <version>${changelist}</version>
 
   <licenses>
     <!-- This is the license for the function's code -->
@@ -17,6 +19,11 @@
   </licenses>
 
   <properties>
+    <function.version>${revision}</function.version>
+    <changelist>${function.version}</changelist>
+  
+    <flattenedPomFilename>.flattened_pom.xml</flattenedPomFilename>
+  
     <!-- We skip the no-snapshots rule because during dev our vertx-functions-core module is a snapshot -->
     <enforcer.skip>true</enforcer.skip>
 
@@ -164,21 +171,6 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${basedir}/../vertx-functions-builder/src/main/docker/libs</directory>
-              <includes>
-                <include>${project.artifactId}-${project.version}.jar</include>
-              </includes>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
-          </filesets>
-        </configuration>
       </plugin>
     </plugins>
   </build>

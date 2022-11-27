@@ -24,6 +24,8 @@
   <properties>
     <vertx.verticle>info.freelibrary.vertx.functions.HttpVerticle</vertx.verticle>
 
+    <flattenedPomFilename>.flattened_pom.xml</flattenedPomFilename>
+
     <!-- Plugin versions -->
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
 
@@ -184,20 +186,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${basedir}/../vertx-functions-builder/src/main/docker/libs</directory>
-              <includes>
-                <include>${project.artifactId}-${revision}.jar</include>
-              </includes>
-            </fileset>
-          </filesets>
-        </configuration>
       </plugin>
     </plugins>
   </build>
