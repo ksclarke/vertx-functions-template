@@ -38,7 +38,7 @@
 
   <properties>
     <revision>0.0.1-SNAPSHOT</revision>
-    
+
     <!-- Default values for the function; can also be overridden from the command line (e.g., setting version in CD)-->
     <function.name>vertx-functions-example</function.name>
     <function.version>0.0.1-SNAPSHOT</function.version>
@@ -56,6 +56,9 @@
     <vertx.plugin.version>1.0.28</vertx.plugin.version> <!-- io.reactiverse:vertx-maven-plugin -->
     <clean.plugin.version>3.2.0</clean.plugin.version>
     <flatten.plugin.version>1.2.7</flatten.plugin.version>
+
+    <!-- An escaped variable delimiter -->
+    <escapedVarDelim>$</escapedVarDelim>
   </properties>
 
   <dependencyManagement>
@@ -245,6 +248,10 @@
                 </fileset>
               </filesets>
             </configuration>
+          </plugin>
+          <plugin>
+            <groupId>info.freelibrary</groupId>
+            <artifactId>freelib-maven-plugins</artifactId>
           </plugin>
         </plugins>
       </build>

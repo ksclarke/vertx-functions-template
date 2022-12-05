@@ -33,9 +33,6 @@
     <logLevel>INFO</logLevel>
     <testLogLevel>ERROR</testLogLevel>
 
-    <!-- An escaped variable delimiter -->
-    <escapedVarDelim>$</escapedVarDelim>
-
     <!-- Values to use in the OpenAPI specification -->
     <api.server.url>http://lisforge.net:8080</api.server.url>
     <api.license.name>Mozilla Public License 2.0</api.license.name>

@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <!-- An example function that you'll change to suit your purposes -->
+  <!-- An example function that you'll change to suit your purposes, except artifactId (which is set in template) -->
   <artifactId>${function.name}</artifactId>
   <name>Maven Lookup Function</name>
   <description>A function to lookup a project's latest version in Maven</description>

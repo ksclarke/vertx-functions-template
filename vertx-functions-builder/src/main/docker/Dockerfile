@@ -1,6 +1,6 @@
 
 #
-# Builds a Vert.x application for an Alpine Docker image
+# Builds our OpenFaaS function into a Vert.x application the runs in an Alpine Docker image.
 #
 
 ARG ALPINE_TAG
@@ -19,11 +19,15 @@ ARG USE_UPX
 ARG PARENT_DIR="/opt/${project.parent.artifactId}"
 ARG PROJECT_DIR="${PARENT_DIR}/${project.artifactId}"
 ARG LIBS_DIR="src/main/docker/libs"
+ARG SRC_DIR="src/main/docker/src"
 ARG POM_NS="http://maven.apache.org/POM/4.0.0"
 
 # Copy our Maven directory into the container
 WORKDIR "${PROJECT_DIR}"
 COPY "/maven/" .
+
+# Compile jsmin and put it on our path
+RUN gcc -o "/usr/bin/jsmin" "${SRC_DIR}/jsmin.c"
 
 # Setup the parent project for our build
 WORKDIR "${PARENT_DIR}"
@@ -42,6 +46,12 @@ RUN mvn -ntp install:install-file -Dfile="${LIBS_DIR}/vertx-functions-core-${pro
     -DgroupId="info.freelibrary" -DartifactId="vertx-functions-core" -Dversion="${project.version}" \
   && mvn -ntp install:install-file -Dfile="${LIBS_DIR}/${function.name}-${function.version}.jar" \
     -DgroupId="info.freelibrary" -DartifactId="${function.name}" -Dversion="${function.version}" -Dpackaging="jar"
+
+# Pull out resource bundles for re-packaging
+RUN for RESOURCE in $(cat src/main/resources/META-INF/native-image/info.freelibrary/*/resource-config.json | \
+    jq '.bundles[].name') ; do echo "=> $RESOURCE" ; done && which jsmin \
+#  && jar tf "${LIBS_DIR}/vertx-functions-core-${project.version}.jar" \
+  && exit 1
 
 # Build project using GraalVM's native-image
 RUN mvn -ntp -B package -DskipBuild="false" -DlogLevel="DEBUG" -DtestLogLevel="DEBUG" -Drevision="${revision}" \

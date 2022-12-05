@@ -23,7 +23,7 @@
 
   <properties>
     <!-- Docker build properties -->
-    <alpine.version>3.16.3</alpine.version>
+    <alpine.version>3.17.0</alpine.version>
     <builder.version>0.1.0</builder.version>
     <watchdog.version>0.9.8</watchdog.version>
 
@@ -79,6 +79,32 @@
     </resources>
 
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>unpack-build-resources</id>
+              <phase>generate-resources</phase>
+              <goals>
+                <goal>unpack</goal>
+              </goals>
+              <configuration>
+                <artifactItems>
+                  <artifactItem>
+                    <groupId>info.freelibrary</groupId>
+                    <artifactId>${function.name}</artifactId>
+                    <version>${function.version}</version>
+                    <type>jar</type>
+                    <includes>**/*.xml,**/*.properties,**/*.json,**/*.yaml</includes>
+                    <excludes>**/pom.properties,**/pom.xml</excludes>
+                    <outputDirectory>${basedir}/src/main/resources</outputDirectory>
+                  </artifactItem>
+                </artifactItems>
+              </configuration>
+            </execution>
+          </executions>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>

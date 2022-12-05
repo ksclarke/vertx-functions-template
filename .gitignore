@@ -6,6 +6,8 @@ lib_managed/
 .flattened-pom.xml
 .flattened_pom.xml
 vertx-functions-builder/src/main/docker/libs/*.jar
+vertx-functions-builder/src/main/resources/*
+!vertx-functions-builder/src/main/resources/.README.txt
 
 # Runtime files to ignore
 .vertx

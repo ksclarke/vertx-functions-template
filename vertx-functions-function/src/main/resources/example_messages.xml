@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+  <!-- Define message codes class name -->
+  <entry key="message-class-name">info.freelibrary.vertx.functions.example.MessageCodes</entry>
+
+  <!-- Vert.x function messages -->
+  <entry key="EX-000">{}</entry>
+
+</properties>
