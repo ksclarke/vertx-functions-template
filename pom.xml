@@ -60,7 +60,7 @@
 
     <!-- An escaped variable delimiter -->
     <escapedVarDelim>$</escapedVarDelim>
-    
+
     <!-- There are the default options; they can be overridden manually or with the template-init plugin -->
     <function.name>vertx-functions-example</function.name>
     <function.group>info.freelibrary</function.group>
@@ -184,6 +184,7 @@
         <plugin>
           <groupId>info.freelibrary</groupId>
           <artifactId>freelib-maven-plugins</artifactId>
+          <version>0.4.4</version>
           <executions>
             <execution>
               <id>generate-media-types</id>
@@ -258,9 +259,18 @@
           <plugin>
             <groupId>info.freelibrary</groupId>
             <artifactId>freelib-maven-plugins</artifactId>
-            <configuration>
-              <function.module>vertx-functions-function</function.module>
-            </configuration>
+            <executions>
+              <execution>
+                <id>module-initialization</id>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>template-init</goal>
+                </goals>
+                <configuration>
+                  <module.name>vertx-functions-example</module.name>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
