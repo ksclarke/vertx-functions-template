@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
 
-  <!-- An example function that you'll change to suit your purposes, except artifactId (which is set in template) -->
-  <artifactId>${function.name}</artifactId>
+  <!-- These three are changed by the template-init plugin; don't manually edit -->
+  <groupId>info.freelibrary</groupId>
+  <artifactId>vertx-functions-example</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  
+  <!-- Change the two below manually -->
   <name>Maven Lookup Function</name>
   <description>A function to lookup a project's latest version in Maven</description>
 
-  <!-- This is not changed here, but by passing in '-Dfunction.version=[VERSION]' on the command line -->
-  <version>${changelist}</version>
-
+  <!-- This is the license for this function's code; feel free to manually change -->
   <licenses>
-    <!-- This is the license for the function's code -->
     <license>
       <name>Mozilla Public License 2.0</name>
       <url>https://opensource.org/licenses/MPL-2.0</url>
@@ -19,16 +20,12 @@
   </licenses>
 
   <properties>
-    <function.version>${revision}</function.version>
-    <changelist>${function.version}</changelist>
-  
     <flattenedPomFilename>.flattened_pom.xml</flattenedPomFilename>
   
     <!-- We skip the no-snapshots rule because during dev our vertx-functions-core module is a snapshot -->
     <enforcer.skip>true</enforcer.skip>
 
     <!-- Values used in the OpenAPI specification's file -->
-    <api.server.url>http://lisforge.net:8080</api.server.url>
     <api.license.name>Mozilla Public License 2.0</api.license.name>
     <api.license.url>https://opensource.org/licenses/MPL-2.0</api.license.url>
   </properties>
@@ -111,6 +108,16 @@
         <groupId>info.freelibrary</groupId>
         <artifactId>freelib-maven-plugins</artifactId>
         <executions>
+          <execution>
+            <id>function-initialization</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>template-init</goal>
+            </goals>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </execution>
           <execution>
             <id>generate-media-types</id>
             <phase>generate-sources</phase>

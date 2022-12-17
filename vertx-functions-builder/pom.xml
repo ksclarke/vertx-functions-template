@@ -65,8 +65,8 @@
     </dependency>
     <dependency>
       <groupId>info.freelibrary</groupId>
-      <artifactId>${function.name}</artifactId>
-      <version>${function.version}</version>
+      <artifactId>${module.artifact}</artifactId>
+      <version>${module.artifact}</version>
     </dependency>
   </dependencies>
 
@@ -80,30 +80,46 @@
 
     <plugins>
       <plugin>
+        <groupId>info.freelibrary</groupId>
+        <artifactId>freelib-maven-plugins</artifactId>
+        <executions>
+          <execution>
+            <id>function-initialization</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>template-init</goal>
+            </goals>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>unpack-build-resources</id>
-              <phase>generate-resources</phase>
-              <goals>
-                <goal>unpack</goal>
-              </goals>
-              <configuration>
-                <artifactItems>
-                  <artifactItem>
-                    <groupId>info.freelibrary</groupId>
-                    <artifactId>${function.name}</artifactId>
-                    <version>${function.version}</version>
-                    <type>jar</type>
-                    <includes>**/*.xml,**/*.properties,**/*.json,**/*.yaml</includes>
-                    <excludes>**/pom.properties,**/pom.xml</excludes>
-                    <outputDirectory>${basedir}/src/main/resources</outputDirectory>
-                  </artifactItem>
-                </artifactItems>
-              </configuration>
-            </execution>
-          </executions>
+        <executions>
+          <execution>
+            <id>unpack-build-resources</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>info.freelibrary</groupId>
+                  <artifactId>${module.artifact}</artifactId>
+                  <version>${module.version}</version>
+                  <type>jar</type>
+                  <includes>**/*.xml,**/*.properties,**/*.json,**/*.yaml</includes>
+                  <excludes>**/pom.properties,**/pom.xml</excludes>
+                  <outputDirectory>${basedir}/src/main/resources</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -155,7 +171,7 @@
             <!-- TODO: Figure out how this works and use it! -->
             <enabled>false</enabled>
           </metadataRepository>
-          <imageName>${function.name}</imageName>
+          <imageName>${module.artifact}</imageName>
           <mainClass>${vertx.verticle}</mainClass>
           <skip>${skipBuild}</skip>
           <buildArgs>
@@ -184,7 +200,7 @@
             <builder>
               <!-- Registry account, if supplied, must end in a slash (e.g. "account/") -->
               <!-- Tag %l uses 'latest' if version is a snapshot; else, version number -->
-              <name>${docker.registry.account}${function.name}:%l</name>
+              <name>${docker.registry.account}${module.artifact}:%l</name>
               <build>
                 <args>
                   <ALPINE_TAG>${alpine.version}</ALPINE_TAG>

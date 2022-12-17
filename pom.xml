@@ -40,10 +40,6 @@
   <properties>
     <revision>0.0.1-SNAPSHOT</revision>
 
-    <!-- Default values for the function; can also be overridden from the command line (e.g., setting version in CD)-->
-    <function.name>vertx-functions-example</function.name>
-    <function.version>0.0.1-SNAPSHOT</function.version>
-
     <!-- Compile-related dependencies -->
     <vertx.version>4.3.4</vertx.version>
     <logback.version>1.4.0</logback.version>
@@ -61,10 +57,10 @@
     <!-- An escaped variable delimiter -->
     <escapedVarDelim>$</escapedVarDelim>
 
-    <!-- There are the default options; they can be overridden manually or with the template-init plugin -->
-    <function.name>vertx-functions-example</function.name>
-    <function.group>info.freelibrary</function.group>
-    <function.version>0.0.1-SNAPSHOT</function.version>
+    <!-- Custom function properties; these default will be overwritten by template-init plugin -->
+    <module.artifact>vertx-functions-example</module.artifact>
+    <module.group>info.freelibrary</module.group>
+    <module.version>0.0.1-SNAPSHOT</module.version>
   </properties>
 
   <dependencyManagement>
@@ -256,18 +252,33 @@
               </filesets>
             </configuration>
           </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>template</id>
+      <properties>
+        <function.artifact>${module.artifact}</function.artifact>
+        <function.group>${module.group}</function.group>
+        <function.version>${module.version}</function.version>
+      </properties>
+      <build>
+        <plugins>
           <plugin>
             <groupId>info.freelibrary</groupId>
             <artifactId>freelib-maven-plugins</artifactId>
             <executions>
               <execution>
-                <id>module-initialization</id>
+                <id>function-initialization</id>
                 <phase>initialize</phase>
                 <goals>
                   <goal>template-init</goal>
                 </goals>
                 <configuration>
-                  <module.name>vertx-functions-example</module.name>
+                  <module.name>vertx-functions-function</module.name>
+                  <module.artifact>${function.artifact}</module.artifact>
+                  <module.group>${function.group}</module.group>
+                  <module.version>${function.version}</module.version>
                 </configuration>
               </execution>
             </executions>

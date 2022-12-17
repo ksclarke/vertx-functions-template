@@ -138,11 +138,22 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
       </plugin>
+
       <!-- Generate our MessageCodes class from the messages resource file -->
       <plugin>
         <groupId>info.freelibrary</groupId>
         <artifactId>freelib-maven-plugins</artifactId>
         <executions>
+          <execution>
+            <id>function-initialization</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>template-init</goal>
+            </goals>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </execution>
           <execution>
             <phase>process-resources</phase>
             <goals>
