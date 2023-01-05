@@ -1,5 +1,15 @@
 [
 {
+  "name":"info.freelibrary.vertx.functions.HelloWorld",
+  "allPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"info.freelibrary.vertx.functions.example.Echo",
+  "allPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"ch.qos.logback.classic.encoder.PatternLayoutEncoder",
   "allPublicMethods":true,
   "methods":[{"name":"<init>","parameterTypes":[] }]

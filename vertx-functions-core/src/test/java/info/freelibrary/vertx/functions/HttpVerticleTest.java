@@ -63,7 +63,7 @@ public class HttpVerticleTest {
                         }))
                 .onSuccess(response -> {
                     aContext.verify(() -> {
-                        assertTrue(response.bodyAsString().contains(LOGGER.getMessage(MessageCodes.vnf_006)));
+                        assertTrue(response.bodyAsString().contains(LOGGER.getMessage(MessageCodes.VFC_006)));
                     });
 
                     aContext.completeNow();

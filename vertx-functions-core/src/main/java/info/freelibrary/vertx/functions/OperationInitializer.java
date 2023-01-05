@@ -60,9 +60,9 @@ public class OperationInitializer {
                             final String method = methods.get(index).toUpperCase(Locale.US);
 
                             if (index == paths.size() - 1) {
-                                LOGGER.debug(MessageCodes.vnf_004, handler, method, paths.get(index));
+                                LOGGER.debug(MessageCodes.VFC_004, handler, method, paths.get(index));
                             } else {
-                                LOGGER.warn(MessageCodes.vnf_005, method, handler);
+                                LOGGER.warn(MessageCodes.VFC_005, method, handler);
                             }
                         }
                     }

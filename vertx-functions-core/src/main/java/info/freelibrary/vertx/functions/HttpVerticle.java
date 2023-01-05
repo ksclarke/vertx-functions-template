@@ -36,17 +36,17 @@ public class HttpVerticle extends AbstractVerticle {
     public void start(final Promise<Void> aPromise) {
         final HttpServerOptions serverOpts = new HttpServerOptions().setCompressionSupported(true);
         final String apiConfig = Env.get(Configs.OPENAPI_SPEC, "target/classes/openapi.yaml");
-        final int port = Env.get(Configs.HTTP_PORT, 8888);
+        final int port = Env.get(Configs.HTTP_PORT, 8888); // Port only set in local testing, not in Docker container
         final Vertx vertx = getVertx();
 
         RouterBuilder.create(vertx, apiConfig).onSuccess(builder -> {
             final Router router = new OperationInitializer(builder).getRouter();
 
             vertx.createHttpServer(serverOpts).requestHandler(router).listen(port, INADDR_ANY).onSuccess(server -> {
-                LOGGER.info(MessageCodes.vnf_001, server.actualPort());
+                LOGGER.info(MessageCodes.VFC_001, server.actualPort());
                 aPromise.complete();
             }).onFailure(aPromise::fail);
-        }).onFailure(details -> aPromise.fail(new ConfigurationException(details, MessageCodes.vnf_003, apiConfig)));
+        }).onFailure(details -> aPromise.fail(new ConfigurationException(details, MessageCodes.VFC_003, apiConfig)));
     }
 
     /**
@@ -66,7 +66,7 @@ public class HttpVerticle extends AbstractVerticle {
 
         // Deploy the main verticle that responds to incoming requests
         Vertx.vertx().deployVerticle(new HttpVerticle()).onFailure(error -> {
-            LOGGER.error(error, MessageCodes.vnf_002, error.getMessage());
+            LOGGER.error(error, MessageCodes.VFC_002, error.getMessage());
         });
     }
 }

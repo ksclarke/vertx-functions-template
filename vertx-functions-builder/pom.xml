@@ -24,7 +24,7 @@
   <properties>
     <!-- Docker build properties -->
     <alpine.version>3.17.0</alpine.version>
-    <builder.version>0.1.0</builder.version>
+    <builder.version>0.1.1</builder.version>
     <watchdog.version>0.9.8</watchdog.version>
 
     <!-- Whether UPX should be used to compress the application -->
@@ -54,6 +54,7 @@
     <!-- Allow snapshot builds for dev purposes -->
     <enforcer.skip>true</enforcer.skip>
 
+    <!-- The name of the flattened POM used created by modules -->
     <flattenedPomFilename>.flattened_pom.xml</flattenedPomFilename>
   </properties>
 
@@ -73,7 +74,7 @@
   <build>
     <resources>
       <resource>
-        <directory>${basedir}/src/main/resources</directory>
+        <directory>${project.basedir}/src/main/resources</directory>
         <filtering>true</filtering>
       </resource>
     </resources>
@@ -236,6 +237,23 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${project.basedir}/src/main/resources/</directory>
+              <includes>
+                <include>**/*.xml</include>
+                <include>**/*.properties</include>
+                <include>**/*.json</include>
+                <include>**/*.yaml</include>
+                <include>META-INF/**</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
     </plugins>
   </build>

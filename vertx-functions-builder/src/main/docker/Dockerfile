@@ -44,19 +44,26 @@ RUN xmlstarlet ed -N pom="${POM_NS}" -u "//pom:parent/pom:version" -v "${project
 # Install the builder project's local dependencies
 RUN mvn -ntp install:install-file -Dfile="${LIBS_DIR}/vertx-functions-core-${project.version}.jar" -Dpackaging="jar" \
     -DgroupId="info.freelibrary" -DartifactId="vertx-functions-core" -Dversion="${project.version}" \
-  && mvn -ntp install:install-file -Dfile="${LIBS_DIR}/${function.name}-${function.version}.jar" \
-    -DgroupId="info.freelibrary" -DartifactId="${function.name}" -Dversion="${function.version}" -Dpackaging="jar"
+  && mvn -ntp install:install-file -Dfile="${LIBS_DIR}/${module.artifact}-${module.version}.jar" \
+    -DgroupId="${module.group}" -DartifactId="${module.artifact}" -Dversion="${module.version}" -Dpackaging="jar"
 
 # Pull out resource bundles for re-packaging
-RUN for RESOURCE in $(cat src/main/resources/META-INF/native-image/info.freelibrary/*/resource-config.json | \
-    jq '.bundles[].name') ; do echo "=> $RESOURCE" ; done && which jsmin \
-#  && jar tf "${LIBS_DIR}/vertx-functions-core-${project.version}.jar" \
-  && exit 1
+# RUN jar tf "${LIBS_DIR}/${module.artifact}-${module.version}.jar"
 
-# Build project using GraalVM's native-image
+RUN for RESOURCE in $(cat "src/main/resources/META-INF/native-image/info.freelibrary/vertx-functions-function/resource-config.json" | \
+      jq '.bundles[].name') ; do \
+        echo "$RESOURCE" ; \
+      done
+#  && echo | && echo | \
+  # && jar tf "${LIBS_DIR}/vertx-functions-core-${project.version}.jar" \
+#  && exit 1
+
+# Build project using GraalVM's native-image -- turn off UPX to see what's wrong if you get a core dump
 RUN mvn -ntp -B package -DskipBuild="false" -DlogLevel="DEBUG" -DtestLogLevel="DEBUG" -Drevision="${revision}" \
-    -Dfunction.version="${function.version}" \
-  && if [ "${USE_UPX}" = true ] ; then upx --best -q "${PROJECT_DIR}/target/${function.name}" ; fi
+    -Dfunction.version="${module.version}" \
+  && if [ "${USE_UPX}" = true ] ; then upx --lzma --best -q "${PROJECT_DIR}/target/${module.artifact}" ; fi
+
+RUN ls -l "${PROJECT_DIR}/target/${module.artifact}"
 
 # Set up the image to which to copy our build artifacts
 FROM alpine:${ALPINE_TAG}
@@ -73,20 +80,20 @@ ARG PROJECT_DIR="/opt/${project.parent.artifactId}/${project.artifactId}"
 COPY --from=watchdog "/fwatchdog" "/usr/bin/fwatchdog"
 RUN chmod +x "/usr/bin/fwatchdog"
 
-COPY --from=builder "${PROJECT_DIR}/target/${function.name}" "/usr/bin/${function.name}"
+COPY --from=builder "${PROJECT_DIR}/target/${module.artifact}" "/usr/bin/${module.artifact}"
 COPY --from=builder "/etc/default/cacerts" "/etc/default/cacerts"
 
 # Set some environmental properties used by the watchdog wrapper
 ENV upstream_url="http://127.0.0.1:8888"
 ENV mode="http"
-ENV fprocess="/usr/bin/${function.name}"
+ENV fprocess="/usr/bin/${module.artifact}"
 
 # Setup our system user and their home directory
-WORKDIR "/home/${function.name}"
-RUN addgroup --system "${function.name}" \
-  && adduser --system --ingroup "${function.name}" "${function.name}" \
-  && chown -R "${function.name}" "/home/${function.name}"
-USER "${function.name}"
+WORKDIR "/home/${module.artifact}"
+RUN addgroup --system "${module.artifact}" \
+  && adduser --system --ingroup "${module.artifact}" "${module.artifact}" \
+  && chown -R "${module.artifact}" "/home/${module.artifact}"
+USER "${module.artifact}"
 
 # This is the default outward facing port that OpenFaaS expects
 EXPOSE 8080

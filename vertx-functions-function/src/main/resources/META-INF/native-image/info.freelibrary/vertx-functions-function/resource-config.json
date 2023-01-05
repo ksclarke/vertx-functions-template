@@ -1,16 +1,12 @@
 {
   "bundles": [
-    { "name": "vnf_messages" },
+    { "name": "vfc_messages" },
     { "name": "freelib-utils_messages" }
   ],
   "resources": {
     "includes": [
       { "pattern": "logback.xml" },
-      { "pattern": ".*.yaml" },
-      { "pattern": "\\QMETA-INF/MANIFEST.MF\\E" },
-      { "pattern": "\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E" },
-      { "pattern": "\\QMETA-INF/services/io.vertx.core.spi.launcher.CommandFactory\\E" },
-      { "pattern": "\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E" }
+      { "pattern": "openapi.yaml" }
     ]
   }
 }

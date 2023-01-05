@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
   <!-- These three are changed by the template-init plugin; don't manually edit -->
   <groupId>info.freelibrary</groupId>
   <artifactId>vertx-functions-example</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  
   <!-- Change the two below manually -->
   <name>Maven Lookup Function</name>
   <description>A function to lookup a project's latest version in Maven</description>
-
   <!-- This is the license for this function's code; feel free to manually change -->
   <licenses>
     <license>
@@ -18,18 +15,16 @@
       <url>https://opensource.org/licenses/MPL-2.0</url>
     </license>
   </licenses>
-
   <properties>
-    <flattenedPomFilename>.flattened_pom.xml</flattenedPomFilename>
-  
-    <!-- We skip the no-snapshots rule because during dev our vertx-functions-core module is a snapshot -->
-    <enforcer.skip>true</enforcer.skip>
-
-    <!-- Values used in the OpenAPI specification's file -->
+    <!-- Values used in the OpenAPI specification's file; feel free to manually change -->
     <api.license.name>Mozilla Public License 2.0</api.license.name>
     <api.license.url>https://opensource.org/licenses/MPL-2.0</api.license.url>
+    <!-- Don't change any of the below; these are hard-coded build variables -->
+    <native.dir>${project.basedir}/src/main/resources/META-INF/native-image</native.dir>
+    <native.output.dir>${project.build.outputDirectory}/META-INF/native-image</native.output.dir>
+    <flattenedPomFilename>.flattened_pom.xml</flattenedPomFilename>
+    <enforcer.skip>true</enforcer.skip>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -47,7 +42,6 @@
       <groupId>info.freelibrary</groupId>
       <artifactId>freelib-utils</artifactId>
     </dependency>
-
     <!-- Test dependencies -->
     <dependency>
       <groupId>io.vertx</groupId>
@@ -72,12 +66,15 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
   <build>
     <resources>
       <resource>
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
+        <excludes>
+          <!-- Cf. the 'process-graalvm-config' execution ID in plugins sections -->
+          <exclude>META-INF/**</exclude>
+        </excludes>
       </resource>
     </resources>
     <testResources>
@@ -85,17 +82,15 @@
         <directory>src/test/resources</directory>
         <filtering>true</filtering>
       </testResource>
-
       <!-- We can also override the default logging configuration with a file in our root project directory -->
       <testResource>
         <directory>${basedir}</directory>
+        <filtering>true</filtering>
         <includes>
           <include>logback-test.xml</include>
         </includes>
-        <filtering>true</filtering>
       </testResource>
     </testResources>
-
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -119,13 +114,16 @@
             </configuration>
           </execution>
           <execution>
-            <id>generate-media-types</id>
-            <phase>generate-sources</phase>
+            <phase>process-resources</phase>
             <goals>
-              <goal>generate-mediatype</goal>
+              <goal>generate-codes</goal>
             </goals>
             <configuration>
-              <mediaTypePackage>info.freelibrary.vertx.functions</mediaTypePackage>
+              <messageFiles>
+                <messageFile>${project.basedir}/src/main/resources/example_messages.xml</messageFile>
+              </messageFiles>
+              <!-- GraalVM only works with resources in properties files -->
+              <createPropertiesFile>true</createPropertiesFile>
             </configuration>
           </execution>
         </executions>
@@ -133,6 +131,7 @@
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
+          <!-- Allows overriding the project's logback.xml with a gitignore'd basedir version -->
           <execution>
             <id>copy-logging-config-for-testing</id>
             <phase>test</phase>
@@ -140,15 +139,8 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes/</outputDirectory>
+              <outputDirectory>${project.basedir}/target/classes/</outputDirectory>
               <resources>
-                <resource>
-                  <directory>${basedir}/src/main/resources</directory>
-                  <filtering>true</filtering>
-                  <includes>
-                    <include>openapi.yaml</include>
-                  </includes>
-                </resource>
                 <resource>
                   <directory>${basedir}</directory>
                   <filtering>true</filtering>
@@ -159,6 +151,7 @@
               </resources>
             </configuration>
           </execution>
+          <!-- Copy this module's build artifact to the builder module's docker directory -->
           <execution>
             <id>copy-artifact-to-builder</id>
             <phase>post-integration-test</phase>
@@ -177,15 +170,46 @@
               </resources>
             </configuration>
           </execution>
+          <!-- Process this project's GraalVM configuration -->
+          <execution>
+            <id>process-graalvm-config</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${native.output.dir}/${module.group}/${module.artifact}/</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${native.dir}/info.freelibrary/vertx-functions-function/</directory>
+                  <includes>
+                    <include>*.json</include>
+                    <include>*.properties</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${project.basedir}/../vertx-functions-builder/src/main/resources/</directory>
+              <includes>
+                <include>${project.artifactId}-${project.version}.jar</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
     </plugins>
   </build>
-
   <parent>
     <groupId>info.freelibrary</groupId>
     <artifactId>vertx-functions-template</artifactId>
     <version>${revision}</version>
   </parent>
-
 </project>

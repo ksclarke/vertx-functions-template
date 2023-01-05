@@ -5,37 +5,37 @@ package info.freelibrary.vertx.functions;
 final public class MessageCodes {
 
 	/**
-	 * Message: Skipping '{}' handler configuration for '{}' (duplicate)
-	 */
-	public static final String vnf_005 = "vnf-005";
-	/**
-	 * Message: Hello World!
-	 */
-	public static final String vnf_006 = "vnf-006";
-	/**
 	 * Message: OpenAPI configuration file was not found: {}
 	 */
-	public static final String vnf_003 = "vnf-003";
-	/**
-	 * Message: Initializing a new '{}' handler for {} requests to '{}'
-	 */
-	public static final String vnf_004 = "vnf-004";
-	/**
-	 * Message: Vert.x Native Functions now running at port: {}
-	 */
-	public static final String vnf_001 = "vnf-001";
-	/**
-	 * Message bundle name.
-	 */
-	public static final String BUNDLE = "vnf_messages";
+	public static final String VFC_003 = "VFC_003";
 	/**
 	 * Message: Vert.x Native Functions failed to start: {}
 	 */
-	public static final String vnf_002 = "vnf-002";
+	public static final String VFC_002 = "VFC_002";
+	/**
+	 * Message: Vert.x Native Functions now running at port: {}
+	 */
+	public static final String VFC_001 = "VFC_001";
 	/**
 	 * Message: {}
 	 */
-	public static final String vnf_000 = "vnf-000";
+	public static final String VFC_000 = "VFC_000";
+	/**
+	 * Message bundle name.
+	 */
+	public static final String BUNDLE = "vfc_messages";
+	/**
+	 * Message: Hello World!
+	 */
+	public static final String VFC_006 = "VFC_006";
+	/**
+	 * Message: Skipping '{}' handler configuration for '{}' (duplicate)
+	 */
+	public static final String VFC_005 = "VFC_005";
+	/**
+	 * Message: Initializing a new '{}' handler for {} requests to '{}'
+	 */
+	public static final String VFC_004 = "VFC_004";
 
 	private MessageCodes() {
 		super();

@@ -161,14 +161,17 @@
             </goals>
             <configuration>
               <messageFiles>
-                <messageFile>src/main/resources/vnf_messages.xml</messageFile>
+                <messageFile>${project.basedir}/src/main/resources/vfc_messages.xml</messageFile>
                 <messageFile>freelib-utils_messages.xml</messageFile>
               </messageFiles>
+              <!-- GraalVM only works with resources in properties files -->
               <createPropertiesFile>true</createPropertiesFile>
             </configuration>
           </execution>
         </executions>
       </plugin>
+      
+      <!-- Run the module's tests -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>

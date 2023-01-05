@@ -25,7 +25,7 @@ public class HelloWorld implements Handler<RoutingContext> {
     @Override
     public void handle(final RoutingContext aEvent) {
         final HttpServerResponse response = aEvent.request().response();
-        final String body = StringUtils.format(TEMPLATE, LOGGER.getMessage(MessageCodes.vnf_006));
+        final String body = StringUtils.format(TEMPLATE, LOGGER.getMessage(MessageCodes.VFC_006));
 
         response.setStatusCode(HTTP.OK).putHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML.toString()).end(body);
     }
