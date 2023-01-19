@@ -9,11 +9,11 @@ final public class MessageCodes {
 	 */
 	public static final String VFC_003 = "VFC_003";
 	/**
-	 * Message: Vert.x Native Functions failed to start: {}
+	 * Message: Vert.x Functions failed to start: {}
 	 */
 	public static final String VFC_002 = "VFC_002";
 	/**
-	 * Message: Vert.x Native Functions now running at port: {}
+	 * Message: Vert.x function(s) now running at port '{}'
 	 */
 	public static final String VFC_001 = "VFC_001";
 	/**

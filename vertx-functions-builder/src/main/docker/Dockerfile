@@ -47,17 +47,6 @@ RUN mvn -ntp install:install-file -Dfile="${LIBS_DIR}/vertx-functions-core-${pro
   && mvn -ntp install:install-file -Dfile="${LIBS_DIR}/${module.artifact}-${module.version}.jar" \
     -DgroupId="${module.group}" -DartifactId="${module.artifact}" -Dversion="${module.version}" -Dpackaging="jar"
 
-# Pull out resource bundles for re-packaging
-# RUN jar tf "${LIBS_DIR}/${module.artifact}-${module.version}.jar"
-
-RUN for RESOURCE in $(cat "src/main/resources/META-INF/native-image/info.freelibrary/vertx-functions-function/resource-config.json" | \
-      jq '.bundles[].name') ; do \
-        echo "$RESOURCE" ; \
-      done
-#  && echo | && echo | \
-  # && jar tf "${LIBS_DIR}/vertx-functions-core-${project.version}.jar" \
-#  && exit 1
-
 # Build project using GraalVM's native-image -- turn off UPX to see what's wrong if you get a core dump
 RUN mvn -ntp -B package -DskipBuild="false" -DlogLevel="DEBUG" -DtestLogLevel="DEBUG" -Drevision="${revision}" \
     -Dfunction.version="${module.version}" \

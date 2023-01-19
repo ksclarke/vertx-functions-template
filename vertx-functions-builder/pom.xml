@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <artifactId>vertx-functions-builder</artifactId>
   <name>Vert.x Functions Builder</name>
-
   <developers>
     <developer>
       <id>ksclarke</id>
@@ -13,51 +11,37 @@
       <timezone>America/New_York</timezone>
     </developer>
   </developers>
-
   <licenses>
     <license>
       <name>Mozilla Public License 2.0</name>
       <url>https://opensource.org/licenses/MPL-2.0</url>
     </license>
   </licenses>
-
   <properties>
     <!-- Docker build properties -->
     <alpine.version>3.17.0</alpine.version>
     <builder.version>0.1.1</builder.version>
     <watchdog.version>0.9.8</watchdog.version>
-
     <!-- Whether UPX should be used to compress the application -->
     <use.upx>true</use.upx>
-
     <!-- The main verticle -->
     <vertx.verticle>info.freelibrary.vertx.functions.HttpVerticle</vertx.verticle>
-
     <!-- Plugin versions -->
     <deploy.plugin.version>2.8.2</deploy.plugin.version>
     <docker.plugin.version>0.40.2</docker.plugin.version>
     <graalvm.plugin.version>0.9.13</graalvm.plugin.version>
-
     <!-- Maven build properties -->
     <skipBuild>true</skipBuild>
-
-    <docker.verbose>true</docker.verbose>
-    <docker.showLogs>true</docker.showLogs>
-
     <!-- The Docker registry user and password used for publishing images -->
     <docker.registry.username />
     <docker.registry.password />
-
     <!-- The Docker registry account, if supplied, must end with a slash (e.g. "account/") -->
     <docker.registry.account />
-
     <!-- Allow snapshot builds for dev purposes -->
     <enforcer.skip>true</enforcer.skip>
-
     <!-- The name of the flattened POM used created by modules -->
     <flattenedPomFilename>.flattened_pom.xml</flattenedPomFilename>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>info.freelibrary</groupId>
@@ -69,8 +53,23 @@
       <artifactId>${module.artifact}</artifactId>
       <version>${module.version}</version>
     </dependency>
+    <!-- Below dependencies only used for testing -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
-
   <build>
     <resources>
       <resource>
@@ -78,7 +77,6 @@
         <filtering>true</filtering>
       </resource>
     </resources>
-
     <plugins>
       <plugin>
         <groupId>info.freelibrary</groupId>
@@ -125,20 +123,15 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
+        <configuration>
+          <portNames>
+            <portName>test.function.port</portName>
+          </portNames>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <executions>
-          <execution>
-            <id>default-compile</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-            <configuration>
-              <skipMain>${skipBuild}</skipMain>
-            </configuration>
-          </execution>
           <execution>
             <id>default-testCompile</id>
             <phase>test-compile</phase>
@@ -146,13 +139,23 @@
               <goal>testCompile</goal>
             </goals>
             <configuration>
-              <skip>${skipBuild}</skip>
+              <skip>false</skip>
             </configuration>
           </execution>
         </executions>
       </plugin>
+      <!-- Plugin for simple integration tests -->
       <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <argLine>${jacoco.agent.arg}</argLine>
+          <includes>
+            <include>**/*IT.java</include>
+          </includes>
+          <environmentVariables>
+            <HTTP_PORT>${test.function.port}</HTTP_PORT>
+          </environmentVariables>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
@@ -181,7 +184,6 @@
           </buildArgs>
         </configuration>
       </plugin>
-
       <!-- Disable standard deploy; we publish a Docker image, not Jar file -->
       <plugin>
         <artifactId>maven-deploy-plugin</artifactId>
@@ -190,7 +192,6 @@
           <skip>true</skip>
         </configuration>
       </plugin>
-
       <!-- A Maven plugin that can build a Docker image with our application -->
       <plugin>
         <groupId>io.fabric8</groupId>
@@ -214,6 +215,20 @@
                   <descriptorRef>project</descriptorRef>
                 </assembly>
               </build>
+              <run>
+                <containerNamePattern>${docker.registry.account}${module.artifact}</containerNamePattern>
+                <ports>
+                  <port>${test.function.port}:8080</port>
+                </ports>
+                <wait>
+                  <!-- Check the health endpoint -->
+                  <http>
+                    <url>http://localhost:${test.function.port}/_/health</url>
+                    <method>GET</method>
+                    <status>200</status>
+                  </http>
+                </wait>
+              </run>
             </builder>
           </imagesMap>
           <authConfig>
@@ -227,7 +242,18 @@
             <phase>pre-integration-test</phase>
             <goals>
               <goal>build</goal>
+              <goal>start</goal>
             </goals>
+          </execution>
+          <execution>
+            <id>docker-stop</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+            <configuration>
+              <allContainers>true</allContainers>
+            </configuration>
           </execution>
           <execution>
             <id>docker-deploy</id>
@@ -235,6 +261,19 @@
             <goals>
               <goal>push</goal>
             </goals>
+            <configuration>
+              <images>
+                <image>
+                  <!-- Registry account, if supplied, must end in a slash (e.g. "account/") -->
+                  <!-- The %l at the end translates to "latest" if version ends in "-SNAPSHOT" -->
+                  <name>${docker.registry.account}${module.artifact}:%l</name>
+                </image>
+              </images>
+              <authConfig>
+                <username>${docker.registry.username}</username>
+                <password>${docker.registry.password}</password>
+              </authConfig>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -257,11 +296,9 @@
       </plugin>
     </plugins>
   </build>
-
   <parent>
     <groupId>info.freelibrary</groupId>
     <artifactId>vertx-functions-template</artifactId>
     <version>${revision}</version>
   </parent>
-
 </project>

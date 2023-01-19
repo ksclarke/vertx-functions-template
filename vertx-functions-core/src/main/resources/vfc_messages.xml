@@ -7,8 +7,8 @@
 
   <!-- Vert.x function messages -->
   <entry key="VFC_000">{}</entry>
-  <entry key="VFC_001">Vert.x Native Functions now running at port: {}</entry>
-  <entry key="VFC_002">Vert.x Native Functions failed to start: {}</entry>
+  <entry key="VFC_001">Vert.x function(s) now running at port '{}'</entry>
+  <entry key="VFC_002">Vert.x Functions failed to start: {}</entry>
   <entry key="VFC_003">OpenAPI configuration file was not found: {}</entry>
   <entry key="VFC_004">Initializing a new '{}' handler for {} requests to '{}'</entry>
   <entry key="VFC_005">Skipping '{}' handler configuration for '{}' (duplicate)</entry>

@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
+  <!-- -->
   <!-- These three are changed by the template-init plugin; don't manually edit -->
+  <!-- -->
   <groupId>info.freelibrary</groupId>
   <artifactId>vertx-functions-example</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <!-- -->
   <!-- Change the two below manually -->
+  <!-- -->
   <name>Maven Lookup Function</name>
   <description>A function to lookup a project's latest version in Maven</description>
+  <!-- -->
   <!-- This is the license for this function's code; feel free to manually change -->
+  <!-- -->
   <licenses>
     <license>
       <name>Mozilla Public License 2.0</name>
@@ -16,16 +22,23 @@
     </license>
   </licenses>
   <properties>
+    <!-- -->
     <!-- Values used in the OpenAPI specification's file; feel free to manually change -->
+    <!-- -->
     <api.license.name>Mozilla Public License 2.0</api.license.name>
     <api.license.url>https://opensource.org/licenses/MPL-2.0</api.license.url>
+    <!-- -->
     <!-- Don't change any of the below; these are hard-coded build variables -->
+    <!-- -->
     <native.dir>${project.basedir}/src/main/resources/META-INF/native-image</native.dir>
     <native.output.dir>${project.build.outputDirectory}/META-INF/native-image</native.output.dir>
     <flattenedPomFilename>.flattened_pom.xml</flattenedPomFilename>
     <enforcer.skip>true</enforcer.skip>
   </properties>
   <dependencies>
+    <!-- -->
+    <!-- Add additional dependencies as needed, but you might need to update the GraalVM config -->
+    <!-- -->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
@@ -58,7 +71,7 @@
       <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- The below dependency is the artifact of another module in this project -->
+    <!-- The below dependency is the artifact of another module in this project; don't change this' -->
     <dependency>
       <groupId>info.freelibrary</groupId>
       <artifactId>vertx-functions-core</artifactId>
