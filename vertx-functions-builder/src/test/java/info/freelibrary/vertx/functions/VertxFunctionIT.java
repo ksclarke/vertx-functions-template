@@ -1,8 +1,7 @@
 
 package info.freelibrary.vertx.functions;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,11 +29,9 @@ public class VertxFunctionIT {
     @DisplayName("Test container's health check endpoint")
     public final void testFunctionHealth(final Vertx aVertx, final VertxTestContext aContext) {
         final WebClient client = WebClient.create(aVertx, new ClientTestConfig());
-        final Future<?> futureGet = client.get("/_/health").expect(ResponsePredicate.SC_SUCCESS).send();
+        final Future<?> get = client.get("/_/health").expect(ResponsePredicate.SC_SUCCESS).send();
 
-        aContext.verify(() -> futureGet.onFailure(error -> {
-            fail(error);
-        })).completeNow();
+        aContext.verify(() -> get.onFailure(Assertions::fail)).completeNow();
     }
 
 }

@@ -1672,10 +1672,18 @@ public enum MediaType {
 		return myType;
 	}
 
+	/**
+	 * Gets the first relevant media-type extension.
+	 * @return The first relevant media-type extension
+	 */
 	public String getExt() {
 		return myExts[0];
 	}
 
+	/**
+	 * Gets an array of relevant media-type extensions.
+	 * @return An array of relevant media-type extensions
+	 */
 	public String[] getExts() {
 		return myExts;
 	}

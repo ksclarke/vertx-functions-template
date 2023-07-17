@@ -1,187 +1,40 @@
 [
-{
-  "name":"info.freelibrary.vertx.functions.HelloWorld",
-  "allPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"info.freelibrary.vertx.functions.example.Echo",
-  "allPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.encoder.PatternLayoutEncoder",
-  "allPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.filter.ThresholdFilter",
-  "allPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.LevelConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.LineSeparatorConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.LoggerConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.MDCConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.classic.pattern.MessageConverter",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.core.ConsoleAppender",
-  "allPublicMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"ch.qos.logback.core.status.NopStatusListener",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueColdProducerFields",
-  "fields":[{"name":"producerLimit"}]
-},
-{
-  "name":"io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueConsumerFields",
-  "fields":[{"name":"consumerIndex"}]
-},
-{
-  "name":"io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueProducerFields",
-  "fields":[{"name":"producerIndex"}]
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.BareCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.ListCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.RunCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.StartCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.StopCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.VersionCommand",
-  "allPublicMethods":true
-},
-{
-  "name":"io.vertx.core.impl.launcher.commands.VertxIsolatedDeployer",
-  "methods":[
-    {"name":"<init>","parameterTypes":[] }, 
-    {"name":"deploy","parameterTypes":["java.lang.String","io.vertx.core.Vertx","io.vertx.core.DeploymentOptions","io.vertx.core.Handler"] }
-  ]
-},
-{
-  "name":"io.vertx.core.logging.SLF4JLogDelegateFactory",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"java.io.FilePermission"
-},
-{
-  "name":"java.lang.RuntimePermission"
-},
-{
-  "name":"java.lang.management.ManagementFactory",
-  "methods":[{"name":"getRuntimeMXBean","parameterTypes":[] }]
-},
-{
-  "name":"java.lang.management.RuntimeMXBean",
-  "methods":[{"name":"getInputArguments","parameterTypes":[] }]
-},
-{
-  "name":"java.net.NetPermission"
-},
-{
-  "name":"java.net.SocketPermission"
-},
-{
-  "name":"java.net.URLPermission",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.String","java.lang.String"] }]
-},
-{
-  "name":"java.nio.Bits",
-  "fields":[{"name":"UNALIGNED"}]
-},
-{
-  "name":"java.nio.Buffer",
-  "fields":[{"name":"address"}]
-},
-{
-  "name":"java.nio.ByteBuffer",
-  "methods":[{"name":"alignedSlice","parameterTypes":["int"] }]
-},
-{
-  "name":"java.nio.DirectByteBuffer",
-  "methods":[{"name":"<init>","parameterTypes":["long","int"] }]
-},
-{
-  "name":"java.security.AllPermission"
-},
-{
-  "name":"java.security.MessageDigestSpi"
-},
-{
-  "name":"java.security.SecureRandomParameters"
-},
-{
-  "name":"java.security.SecurityPermission"
-},
-{
-  "name":"java.util.PropertyPermission"
-},
-{
-  "name":"jdk.internal.misc.Unsafe",
-  "methods":[{"name":"getUnsafe","parameterTypes":[] }]
-},
-{
-  "name":"sun.misc.Unsafe",
-  "fields":[{"name":"theUnsafe"}],
-  "methods":[
-    {"name":"copyMemory","parameterTypes":["java.lang.Object","long","java.lang.Object","long","long"] }, 
-    {"name":"getAndAddLong","parameterTypes":["java.lang.Object","long","long"] }, 
-    {"name":"getAndSetObject","parameterTypes":["java.lang.Object","long","java.lang.Object"] }, 
-    {"name":"invokeCleaner","parameterTypes":["java.nio.ByteBuffer"] }, 
-    {"name":"storeFence","parameterTypes":[] }
-  ]
-},
-{
-  "name":"sun.nio.ch.SelectorImpl",
-  "fields":[
-    {"name":"publicSelectedKeys"}, 
-    {"name":"selectedKeys"}
-  ]
-},
-{
-  "name":"sun.security.provider.NativePRNG",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.SHA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-}
+	{
+		"name": "info.freelibrary.vertx.functions.HelloWorld",
+		"allPublicMethods": true,
+		"methods": [
+			{
+				"name": "<init>",
+				"parameterTypes": []
+			}
+		]
+	},
+	{
+		"name": "info.freelibrary.vertx.functions.example.Echo",
+		"allPublicMethods": true,
+		"methods": [
+			{
+				"name": "<init>",
+				"parameterTypes": []
+			}
+		]
+	},
+	{
+		"name": "io.vertx.core.impl.launcher.commands.RunCommand",
+		"allDeclaredConstructors": true,
+		"allDeclaredMethods": true
+	},
+	{
+		"name": "io.vertx.core.impl.launcher.commands.VertxIsolatedDeployer",
+		"allDeclaredConstructors": true,
+		"allDeclaredMethods": true
+	},
+	{
+		"name": "java.lang.Long",
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "java.lang.Integer",
+		"allDeclaredConstructors": true
+	}
 ]

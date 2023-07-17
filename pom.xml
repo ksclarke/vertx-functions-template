@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
+
   <artifactId>vertx-functions-template</artifactId>
   <version>${revision}</version>
   <packaging>pom</packaging>
   <name>Vert.x Functions Template</name>
   <description>A Vert.x template for OpenFaaS functions</description>
   <url>https://github.com/ksclarke/vertx-functions-template</url>
+
   <licenses>
     <license>
       <name>Mozilla Public License 2.0</name>
       <url>https://opensource.org/licenses/MPL-2.0</url>
     </license>
   </licenses>
+
   <scm>
     <connection>scm:git:git@github.com:ksclarke/vertx-functions-template.git</connection>
     <developerConnection>scm:git:git@github.com:ksclarke/vertx-functions-template.git</developerConnection>
     <url>git@github.com:ksclarke/vertx-functions-template.git</url>
   </scm>
+
   <issueManagement>
     <system>GitHub</system>
     <url>https://github.com/ksclarke/vertx-functions-template/issues</url>
   </issueManagement>
+
   <developers>
     <developer>
       <id>ksclarke</id>
@@ -31,26 +36,33 @@
       <timezone>America/New_York</timezone>
     </developer>
   </developers>
+
   <properties>
     <revision>0.0.1-SNAPSHOT</revision>
+
     <!-- Compile-related dependencies -->
-    <vertx.version>4.3.7</vertx.version>
+    <vertx.version>4.4.4</vertx.version>
     <logback.version>1.4.0</logback.version>
     <freelib.utils.version>3.3.0</freelib.utils.version>
     <jackson.databind.version>2.14.0-rc2</jackson.databind.version>
+
     <!-- Test-related dependencies -->
     <junit.version>5.9.1</junit.version>
+
     <!-- Plugin dependency versions -->
     <vertx.plugin.version>1.0.28</vertx.plugin.version> <!-- io.reactiverse:vertx-maven-plugin -->
     <clean.plugin.version>3.2.0</clean.plugin.version>
     <flatten.plugin.version>1.2.7</flatten.plugin.version>
+
     <!-- An escaped variable delimiter -->
     <escapedVarDelim>$</escapedVarDelim>
+
     <!-- Custom function properties; these default will be overwritten by template-init plugin -->
     <module.artifact>vertx-functions-example</module.artifact>
     <module.group>info.freelibrary</module.group>
     <module.version>0.0.1-SNAPSHOT</module.version>
   </properties>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -89,11 +101,13 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
   <modules>
     <module>vertx-functions-core</module>
     <module>vertx-functions-function</module>
     <module>vertx-functions-builder</module>
   </modules>
+
   <build>
     <pluginManagement>
       <plugins>
@@ -124,6 +138,7 @@
             </execution>
           </executions>
         </plugin>
+
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
@@ -140,6 +155,7 @@
             </environmentVariables>
           </configuration>
         </plugin>
+
         <!-- This plugin is required to make the version persist to the POM on publishing -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -159,6 +175,7 @@
             </execution>
           </executions>
         </plugin>
+
         <!-- Generate our MessageCodes class from the messages resource file -->
         <plugin>
           <groupId>info.freelibrary</groupId>
@@ -183,14 +200,17 @@
       </plugins>
     </pluginManagement>
   </build>
+
   <profiles>
     <profile>
       <id>snyk-check</id>
+
       <activation>
         <property>
           <name>env.SNYK_TOKEN</name>
         </property>
       </activation>
+
       <build>
         <plugins>
           <plugin>
@@ -218,13 +238,16 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>template-pom</id>
+
       <activation>
         <file>
           <exists>.flattened-pom.xml</exists>
         </file>
       </activation>
+
       <build>
         <plugins>
           <plugin>
@@ -236,6 +259,7 @@
                   <skip>true</skip>
                 </configuration>
               </execution>
+
               <!-- Copy the template project's flattened POM to the builder module's docker configs directory -->
               <execution>
                 <id>copy-pom-to-builder</id>
@@ -257,6 +281,7 @@
               </execution>
             </executions>
           </plugin>
+
           <plugin>
             <artifactId>maven-clean-plugin</artifactId>
             <configuration>
@@ -273,13 +298,16 @@
         </plugins>
       </build>
     </profile>
+
     <profile>
       <id>template</id>
+
       <properties>
         <function.artifact>${module.artifact}</function.artifact>
         <function.group>${module.group}</function.group>
         <function.version>${module.version}</function.version>
       </properties>
+
       <build>
         <plugins>
           <plugin>
@@ -305,9 +333,11 @@
       </build>
     </profile>
   </profiles>
+
   <parent>
     <groupId>info.freelibrary</groupId>
     <artifactId>freelib-parent</artifactId>
-    <version>8.0.0</version>
+    <version>8.0.3</version>
   </parent>
+
 </project>
