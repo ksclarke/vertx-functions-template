@@ -9,10 +9,10 @@ end result of a build is a Docker container with a Vert.x-based function that ca
 
 To create your own function, you should modify the contents of `vertx-functions-function`. The key parts to modify are
 the `src/main/resources/openapi.yaml` and the code in `src/main/java`. Once you have an implementation of a Vert.x
-`Handler<RoutingContext>` in `src/main/java`, you should put its full class name in the openapi.yaml document as an
+`Handler<RoutingContext>` in `src/main/java`, you should put its full class name in the `openapi.yaml` document as an
 endpoint's `operationId`. See the existing openapi.yaml for an example.
 
-In addition, your handler will need to be included in the reflection-config.json file. You will see examples in that
+In addition, your handler will need to be included in the [reflection-config.json](vertx-functions-function/src/main/resources/META-INF/native-image/info.freelibrary/vertx-functions-function/reflection-config.json) file. You will see examples in that
 file for guidance, including the example project's pre-existing Echo handler.
 
 The existing build should work with your function unless you add a dependency that uses reflection and isn't currently
@@ -22,7 +22,7 @@ handled in the build's GraalVM configuration. How to configure GraalVM for new r
 
 The following must be installed prior to building this project:
 
-* JDK >= 11
+* JDK >= 17
 * Maven >= 3.6.3
 * Docker >= 20.10.1
 
@@ -46,4 +46,4 @@ project will be rebuilt.
 
 ## Contact Information
 
-If you notice something that is broken or that needs fixing, please submit a ticket to the project's [issues queue](https://github.com/ksclarke/vertx-functions-template/issues). If you have a question or a general comment about the project, please use the project's [discussion board](https://github.com/ksclarke/vertx-native-functions/discussions).
+If you notice something that is broken or that needs fixing, please submit a ticket to the project's [issues queue](https://github.com/ksclarke/vertx-functions-template/issues). If you have a question or a general comment about the project, please use the project's [discussion board](https://github.com/ksclarke/vertx-functions-template/discussions).
