@@ -176,26 +176,10 @@
           </executions>
         </plugin>
 
-        <!-- Generate our MessageCodes class from the messages resource file -->
+        <!-- Include various helper plugins -->
         <plugin>
           <groupId>info.freelibrary</groupId>
           <artifactId>freelib-maven-plugins</artifactId>
-          <!-- FIXME: update version in parent project -->
-          <version>0.4.5</version>
-          <executions>
-            <execution>
-              <id>default</id>
-              <phase>generate-sources</phase>
-              <goals>
-                <goal>generate-mediatype</goal>
-              </goals>
-              <configuration>
-                <!-- FIXME: Make package dynamic? -->
-                <mediaTypePackage>info.freelibrary.vertx.functions</mediaTypePackage>
-                <ignoreMissing>true</ignoreMissing>
-              </configuration>
-            </execution>
-          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
