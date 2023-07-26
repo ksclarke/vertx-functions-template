@@ -61,11 +61,6 @@
       <artifactId>vertx-functions-core</artifactId>
       <version>${revision}</version>
     </dependency>
-    <dependency>
-      <groupId>info.freelibrary</groupId>
-      <artifactId>${module.artifact}</artifactId>
-      <version>${module.version}</version>
-    </dependency>
 
     <!-- Below dependencies only used for testing -->
     <dependency>
@@ -124,7 +119,7 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>info.freelibrary</groupId>
+                  <groupId>${module.group}</groupId>
                   <artifactId>${module.artifact}</artifactId>
                   <version>${module.version}</version>
                   <type>jar</type>
@@ -158,7 +153,7 @@
               <goal>testCompile</goal>
             </goals>
             <configuration>
-              <skip>false</skip>
+              <skip>${skipBuild}</skip>
             </configuration>
           </execution>
         </executions>
@@ -186,7 +181,7 @@
         <executions>
           <execution>
             <goals>
-              <goal>build</goal>
+              <goal>compile-no-fork</goal>
             </goals>
             <phase>package</phase>
           </execution>
